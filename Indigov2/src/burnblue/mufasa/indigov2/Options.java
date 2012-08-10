@@ -23,6 +23,7 @@ public class Options extends Activity
 	public static String telephone = "telephone";
 	public static String textTimer = "textTimer";
 	public static String moduleip = "moduleip";
+	public static String moduleport = "moduleport";
     SharedPreferences ourData;
 	
 	
@@ -38,17 +39,20 @@ public class Options extends Activity
         Integer SavedPropos = ourData.getInt(propos,1);
         String SavedTelephone = ourData.getString(telephone, "9563800814");
         String SavedTextTimer = ourData.getString(textTimer, "1200");
-        String SavedModuleIp = ourData.getString(moduleip, "192.168.2.2");        
+        String SavedModuleIp = ourData.getString(moduleip, "192.168.2.2");
+        String SavedModulePort = ourData.getString(moduleport, "2000");
         
 		Spinner provider = (Spinner) findViewById(R.id.spinner1);
 		EditText telephone = (EditText) findViewById(R.id.editText1);
 		EditText texttimer = (EditText) findViewById(R.id.editText2);
 		EditText moduleip = (EditText) findViewById(R.id.editText3);
-        
+		EditText moduleport = (EditText) findViewById(R.id.editText4);
+		
         provider.setSelection(SavedPropos);
         telephone.setText(SavedTelephone);
         texttimer.setText(SavedTextTimer);
         moduleip.setText(SavedModuleIp);
+        moduleport.setText(SavedModulePort);
         
     	saveButton();
     	cancelButton();
@@ -66,12 +70,14 @@ public class Options extends Activity
       			EditText et_telephone = (EditText) findViewById(R.id.editText1);
       			EditText et_texttimer = (EditText) findViewById(R.id.editText2);
       			EditText et_moduleip = (EditText) findViewById(R.id.editText3);
+      			EditText et_moduleport = (EditText) findViewById(R.id.editText4);
       			
       			String  l_provider = et_provider.getSelectedItem().toString();
       			Integer l_propos = et_provider.getSelectedItemPosition();
       			String l_telephone = et_telephone.getText().toString();
       			String l_texttimer = et_texttimer.getText().toString();
       			String l_moduleip = et_moduleip.getText().toString();
+      			String l_moduleport = et_moduleport.getText().toString();
       			
       	    	SharedPreferences.Editor editor = ourData.edit();
       	    	
@@ -80,6 +86,7 @@ public class Options extends Activity
       	    	editor.putString(telephone, l_telephone);
       	    	editor.putString(textTimer, l_texttimer);
       	    	editor.putString(moduleip, l_moduleip);
+      	    	editor.putString(moduleport, l_moduleport);
       	    	
       	    	editor.commit();
       	    	
@@ -88,6 +95,7 @@ public class Options extends Activity
       	    	System.out.println( MainActivity.iv_android + "saving off telephone: " + l_telephone );
       	    	System.out.println( MainActivity.iv_android + "saving off text timer: " + l_texttimer );
       	    	System.out.println( MainActivity.iv_android + "saving off module ip: " + l_moduleip );
+      	    	System.out.println( MainActivity.iv_android + "saving off module port: " + l_moduleport );
      	    	
     			startActivity(new Intent( v.getContext(), MainActivity.class));
     		}

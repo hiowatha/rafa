@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -27,6 +28,10 @@ public class Setup extends Activity
 	StringBuffer sb, sb1, sb2, command;
 	Handler mHandler = new Handler();
 	
+	SharedPreferences ourData;
+	String SavedIp;
+	int SavedPort;
+	
 	int len = 0;
 	int len1 = 0;
 
@@ -39,7 +44,13 @@ public class Setup extends Activity
     	requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);        
         setContentView(R.layout.setup);
+
+        
+        ourData = getSharedPreferences(Options.fileName, 0);
+    	SavedIp = ourData.getString(Options.moduleip, "169.254.1.1");
+        SavedPort = ourData.getInt(Options.moduleport, 2000 );
     	
+        
     	try 
 		{
 			telnet.connect(server, port);

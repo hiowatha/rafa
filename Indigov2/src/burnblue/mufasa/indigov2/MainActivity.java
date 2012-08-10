@@ -41,6 +41,7 @@ public class MainActivity extends Activity
 	int len1 = 0;
 	SharedPreferences ourData;
 	String SavedIp;
+	int SavedPort;
 	boolean l_worked;
 	
 	private ToggleButton toggleButton1, toggleButton2, toggleButton3, toggleButton4;
@@ -60,7 +61,8 @@ public class MainActivity extends Activity
     
         ourData = getSharedPreferences(Options.fileName, 0);
     	SavedIp = ourData.getString(Options.moduleip, "169.254.1.1");
-        
+        SavedPort = Integer.parseInt(ourData.getString(Options.moduleport, "2000" ));
+    	
     	garageDoor1Button();
     	light1Button();
     	garageDoor2Button();
@@ -195,7 +197,7 @@ public class MainActivity extends Activity
     				try
     				{
     					telnet.setConnectTimeout(125);
-    					telnet.connect(SavedIp, port);
+    					telnet.connect(SavedIp, SavedPort);
     				}
     				catch ( java.net.SocketTimeoutException e)
     				{
