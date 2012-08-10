@@ -53,6 +53,8 @@
     <string name="Provider">Provider</string>
     <string name="WifiPassword">WIFI Password</string>
     <string name="back">back</string>
+    <string name="ModulePort">Module Port</string>
+    <string name="SamplePort">20000</string>
     
     
 </resources>

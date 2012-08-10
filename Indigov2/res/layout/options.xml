@@ -93,13 +93,38 @@
         android:maxLength="32"
         android:text="@string/SampleIP"
         android:width="150dp" />
+
+       <TextView
+       android:id="@+id/textView5"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignLeft="@+id/textView1"
+       android:layout_below="@+id/editText3"
+       android:layout_marginTop="35dp"
+       android:text="@string/ModulePort"
+       android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+    <EditText
+        android:id="@+id/editText4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textView5"
+        android:layout_alignLeft="@+id/editText1"
+        android:ems="10"
+        android:inputType="number"
+        android:maxLength="6"        
+        android:text="@string/SamplePort"
+        android:width="150dp" />
+    
+    
     
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView4"
-        android:layout_below="@+id/textView4"
+        android:layout_alignLeft="@+id/textView5"
+        android:layout_below="@+id/textView5"
         android:layout_marginTop="50dp"
         android:text="@string/Cancel" />
 

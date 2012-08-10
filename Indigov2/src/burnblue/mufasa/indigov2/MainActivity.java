@@ -190,7 +190,6 @@ public class MainActivity extends Activity
     			
     			try 
     			{	
-					System.out.println( iv_android + "Setting l worked to false" );
     				l_worked = false;
     				
     				try
@@ -200,10 +199,10 @@ public class MainActivity extends Activity
     				}
     				catch ( java.net.SocketTimeoutException e)
     				{
-    					System.out.println( iv_android + "connection failure" );
+    					System.out.println( iv_android + "connection failure: socket timeout" );
     					
-    					text.getText();
-						text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
+    					//text.getText();
+						//text.append( iv_android + "connection failure: timeout" + toggleButton2.getText() + " \n" );
     					
     					if (toggleButton2.getText().equals("on"))
         					toggleButton2.setChecked(false);
@@ -211,6 +210,20 @@ public class MainActivity extends Activity
         					toggleButton2.setChecked(true);
     					
     				}
+    				catch ( java.net.UnknownHostException e)
+    				{
+    					System.out.println( iv_android + "connection failure: unknown host" );
+    					
+    					//text.getText();
+						//text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
+    					
+    					if (toggleButton2.getText().equals("on"))
+        					toggleButton2.setChecked(false);
+        				else
+        					toggleButton2.setChecked(true);
+    					
+    				}
+    				
     				
     				if (telnet.isConnected())
     				{		
@@ -341,8 +354,6 @@ public class MainActivity extends Activity
 	    								
 	    								l_worked = true;
 	    								
-	    								System.out.println( iv_android + "Setting l worked to true" );
-	    								
 	    								disconnect();			
 	    								
 	    								System.out.println( iv_android + "communication done: ip: " + SavedIp );
@@ -352,8 +363,6 @@ public class MainActivity extends Activity
 	    								{
 	    									public void run() 
 	    									{
-	    	    								System.out.println( iv_android + "l worked = " + l_worked + "button: "+ toggleButton2.getText() );
-	    										
 	    										if ( l_worked )
 	    	    				    			{
 	    	    				    				if (toggleButton2.getText().equals("on"))
@@ -365,11 +374,6 @@ public class MainActivity extends Activity
 	    	    				    					image2.setImageResource(R.drawable.light_off);
 	    	    				    				}    			
 	    	    				    			}
-	    	    				    			
-	
-	//    										MainActivity.this.image2.setImageResource(R.drawable.light_on);
-	    										//MainActivity.this.text.getText();
-	    										//MainActivity.this.text.append( sb.toString() );
 	    									}
 	    								});
 	    				    			    								
