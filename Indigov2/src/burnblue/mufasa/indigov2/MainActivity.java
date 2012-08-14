@@ -35,7 +35,7 @@ public class MainActivity extends Activity
 	private TelnetClient telnet = new TelnetClient();
 	private InputStream in;
 	private PrintStream out;
-	StringBuffer sb, sb1, sb2, command, command2;
+	StringBuffer sb, sb1, sb2;
 	Handler mHandler = new Handler();
 	int len = 0;
 	int len1 = 0;
@@ -51,6 +51,14 @@ public class MainActivity extends Activity
 	public static String iv_adhoc = "169.254.1.1";
 	public static String iv_android = "Android> ";
 	public static String iv_wifly = "Wifly> ";
+	
+	
+	public static String modulePin7on =  "set sys output 0x0080 0x0080 \r";
+  	public static String modulePin7off = "set sys output 0x0000 0x0080 \r";
+
+	String modulePin4on =  "set sys output 0x0100 0x0100 \r";
+  	String modulePin4off = "set sys output 0x0000 0x0100 \r";
+  	
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -86,19 +94,221 @@ public class MainActivity extends Activity
    {
     	toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
     	image1 = (ImageView) findViewById(R.id.imageView1);
+    	
+
     	 
     	toggleButton1.setOnClickListener(new OnClickListener() 
     	{
       		public void onClick(View v) 
     		{
-    			if (toggleButton1.getText().equals("open"))
-    			{
-    				image1.setImageResource(R.drawable.garage_opened);    		
-    			}
-    			else
-    			{
-    				image1.setImageResource(R.drawable.garage_closed);
-    			}
+      			try 
+    			{	
+    				l_worked = false;
+    				
+    				try
+    				{
+    					telnet.setConnectTimeout(250);
+    					telnet.connect(SavedIp, SavedPort);
+    				}
+    				catch ( java.net.SocketTimeoutException e)
+    				{
+    					System.out.println( iv_android + "connection failure: socket timeout" );
+    					
+    					//text.getText();
+						//text.append( iv_android + "connection failure: timeout" + toggleButton2.getText() + " \n" );
+    					
+    					if (toggleButton1.getText().equals("open"))
+        					toggleButton1.setChecked(false);
+        				else
+        					toggleButton1.setChecked(true);
+    					
+    				}
+    				catch ( java.net.UnknownHostException e)
+    				{
+    					System.out.println( iv_android + "connection failure: unknown host" );
+    					
+    					//text.getText();
+						//text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
+    					
+    					if (toggleButton1.getText().equals("open"))
+        					toggleButton1.setChecked(false);
+        				else
+        					toggleButton1.setChecked(true);
+    					
+    				}
+    				
+    				
+    				if (telnet.isConnected())
+    				{		
+    					in = telnet.getInputStream();			
+    					out = new PrintStream(telnet.getOutputStream());
+    				
+    					Thread mThread = new Thread(new Runnable() 
+    					{
+    						public void run() 
+    						{
+    							try 
+    							{
+    								sb = new StringBuffer();						
+    								do 
+    								{
+    									System.out.println( iv_android + "Starting handshake: ip: " + SavedIp );						
+
+    									do  
+    									{
+    										len = in.read();
+    										String s = Character.toString((char)len);								
+    										sb.append( s );								
+    																									
+    									} while ( !sb.toString().equals("*HELLO*") );
+    								
+    								
+    									System.out.println( iv_android + "Received: " + sb );
+    								
+    									out.println("$$$");
+    									out.flush();
+    									
+    									out.println("\r");
+    									out.flush();
+    								   	
+    									try 
+    									{
+	    									TimeUnit.MILLISECONDS.sleep(250);				
+	    								}
+	    								catch (InterruptedException e) 
+	    								{
+	    									e.printStackTrace();
+	    								}
+    									
+	    								StringBuffer sb1 = new StringBuffer();
+	    								len = 0;
+	    								do 
+	    								{
+	    									len = in.read();			
+	    									String s = Character.toString((char)len);			
+	    									sb1.append( s );			
+	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
+	    										
+	    									//if (sb1.length() > 2)
+	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
+	    										
+	    									if ( (sb1.length() > 2) && 
+	    										(sb1.substring(sb1.length()-2)).equals("> ") )
+	    										break;
+	    										
+	    								} while( true );
+	    									
+	    								System.out.println(iv_android + "HandShake Done, Sending:" + modulePin7on);
+	
+	    								out.println(modulePin7on);
+	    								out.flush();		
+	    									
+	    								try 
+	    								{
+	    									TimeUnit.MILLISECONDS.sleep(250);				
+	    								}
+	    								catch (InterruptedException e) 
+	    								{
+	    									e.printStackTrace();
+	    								}
+	    								
+	    								sb1.setLength(0);
+	    								len = 0;
+	    								do 
+	    								{
+	    									len = in.read();			
+	    									String s = Character.toString((char)len);			
+	    									sb1.append( s );			
+	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
+	    										
+	    									//if (sb1.length() > 2)
+	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
+	    										
+	    									if ( (sb1.length() > 2) && 
+	    										(sb1.substring(sb1.length()-2)).equals("> ") )
+	    										break;
+	    										
+	    								} while( true );
+	    									
+	    								System.out.println( iv_wifly + sb1 );
+	    								System.out.println( iv_android + "Sending second command: " + modulePin7off);
+	
+	    								out.println(modulePin7off);
+	    								out.flush();		
+	    									
+	    								try 
+	    								{
+	    									TimeUnit.MILLISECONDS.sleep(500);				
+	    								}
+	    								catch (InterruptedException e) 
+	    								{
+	    									e.printStackTrace();
+	    								}
+	    										
+	    								sb1.setLength(0);
+	    								len = 0;
+	    								do 
+	    								{
+	    									len = in.read();			
+	    									String s = Character.toString((char)len);			
+	    									sb1.append( s );			
+	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
+	    										
+	    									//if (sb1.length() > 2)
+	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
+	    										
+	    									if ( (sb1.length() > 2) && 
+	    										(sb1.substring(sb1.length()-2)).equals("> ") )
+	    										break;
+	    										
+	    								} while( true );
+	    									
+	    								System.out.println( iv_wifly + sb1 );
+	    								
+	    								l_worked = true;
+	    								
+	    								disconnect();			
+	    								
+	    								System.out.println( iv_android + "communication done: ip: " + SavedIp );
+	    								
+	    								
+	    								MainActivity.this.mHandler.post(new Runnable()
+	    								{
+	    									public void run() 
+	    									{
+	    										if ( l_worked )
+	    	    				    			{
+	    											
+	    									      	if (toggleButton1.getText().equals("open"))
+	    											{
+	    												image1.setImageResource(R.drawable.garage_opened);    		
+	    											}
+	    											else
+	    											{
+	    												image1.setImageResource(R.drawable.garage_closed);
+	    											}
+	    	    				    			}
+	    									}
+	    								});
+	    				    			    								
+	    							} while ( false );
+	    							
+	    						} 
+	    						catch (IOException e) 
+	    						{
+	    							e.printStackTrace();
+	    						}
+	    					}
+	    				});
+	    				
+    					mThread.start();
+    				}
+	    		}
+	    		catch (Exception e) 
+	    		{
+	    			e.printStackTrace();
+	    		}
+
     		}
  
     	});
@@ -140,8 +350,8 @@ public class MainActivity extends Activity
 			
 		} while( true );
 		
-		System.out.println(command);
-		out.println(command);
+		System.out.println(modulePin7on);
+		out.println(modulePin7on);
 		out.flush();		
 		
 		try 
@@ -180,9 +390,6 @@ public class MainActivity extends Activity
 		toggleButton2 = (ToggleButton) findViewById(R.id.toggleButton2);
 		text = (TextView)findViewById(R.id.textView5);
       	image2 = (ImageView) findViewById(R.id.imageView2);
-		
-      	command = new StringBuffer("set sys output 0x0080 0x0080 \r");
-      	command2 = new StringBuffer("set sys output 0x0000 0x0080 \r");      	
 
     	toggleButton2.setOnClickListener(new OnClickListener() 
     	{
@@ -196,7 +403,7 @@ public class MainActivity extends Activity
     				
     				try
     				{
-    					telnet.setConnectTimeout(125);
+    					telnet.setConnectTimeout(250);
     					telnet.connect(SavedIp, SavedPort);
     				}
     				catch ( java.net.SocketTimeoutException e)
@@ -262,7 +469,7 @@ public class MainActivity extends Activity
     								   	
     									try 
     									{
-	    									TimeUnit.MILLISECONDS.sleep(125);				
+	    									TimeUnit.MILLISECONDS.sleep(250);				
 	    								}
 	    								catch (InterruptedException e) 
 	    								{
@@ -287,14 +494,14 @@ public class MainActivity extends Activity
 	    										
 	    								} while( true );
 	    									
-	    								System.out.println(iv_android + "HandShake Done, Sending:" + command);
+	    								System.out.println(iv_android + "HandShake Done, Sending:" + modulePin4on);
 	
-	    								out.println(command);
+	    								out.println(modulePin4on);
 	    								out.flush();		
 	    									
 	    								try 
 	    								{
-	    									TimeUnit.MILLISECONDS.sleep(125);				
+	    									TimeUnit.MILLISECONDS.sleep(250);				
 	    								}
 	    								catch (InterruptedException e) 
 	    								{
@@ -320,14 +527,14 @@ public class MainActivity extends Activity
 	    								} while( true );
 	    									
 	    								System.out.println( iv_wifly + sb1 );
-	    								System.out.println( iv_android + "Sending second command: " + command2);
+	    								System.out.println( iv_android + "Sending second command: " + modulePin4off);
 	
-	    								out.println(command2);
+	    								out.println(modulePin4off);
 	    								out.flush();		
 	    									
 	    								try 
 	    								{
-	    									TimeUnit.MILLISECONDS.sleep(250);				
+	    									TimeUnit.MILLISECONDS.sleep(500);				
 	    								}
 	    								catch (InterruptedException e) 
 	    								{
@@ -399,6 +606,7 @@ public class MainActivity extends Activity
     		}
  
     	});
+    	
    } 
    
    
