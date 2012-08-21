@@ -664,15 +664,15 @@ public class MainActivity extends Activity
     					//text.getText();
 						//text.append( iv_android + "connection failure: timeout" + toggleButton2.getText() + " \n" );
     					
-    					if (toggleButton1.getText().equals("open"))
+    					if (toggleButton3.getText().equals("open"))
     					{
-        					toggleButton1.setChecked(false);
-        					toggleButton2.setChecked(false);
+        					toggleButton3.setChecked(false);
+        					toggleButton4.setChecked(false);
     					}
         				else
         				{
-        					toggleButton1.setChecked(true);
-        					toggleButton2.setChecked(true);
+        					toggleButton3.setChecked(true);
+        					toggleButton4.setChecked(true);
         				}
     					
     				}
@@ -683,15 +683,15 @@ public class MainActivity extends Activity
     					//text.getText();
 						//text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
     					
-    					if (toggleButton1.getText().equals("open"))
+    					if (toggleButton3.getText().equals("open"))
     					{
-        					toggleButton1.setChecked(false);
-        					toggleButton2.setChecked(false);
+        					toggleButton3.setChecked(false);
+        					toggleButton4.setChecked(false);
     					}
         				else
         				{
-        					toggleButton1.setChecked(true);
-        					toggleButton2.setChecked(true);
+        					toggleButton3.setChecked(true);
+        					toggleButton4.setChecked(true);
         				}
     					
     				}
@@ -903,10 +903,10 @@ public class MainActivity extends Activity
     					//text.getText();
 						//text.append( iv_android + "connection failure: timeout" + toggleButton2.getText() + " \n" );
     					
-    					if (toggleButton2.getText().equals("on"))
-        					toggleButton2.setChecked(false);
+    					if (toggleButton4.getText().equals("on"))
+        					toggleButton4.setChecked(false);
         				else
-        					toggleButton2.setChecked(true);
+        					toggleButton4.setChecked(true);
     					
     				}
     				catch ( java.net.UnknownHostException e)
@@ -916,10 +916,10 @@ public class MainActivity extends Activity
     					//text.getText();
 						//text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
     					
-    					if (toggleButton2.getText().equals("on"))
-        					toggleButton2.setChecked(false);
+    					if (toggleButton4.getText().equals("on"))
+        					toggleButton4.setChecked(false);
         				else
-        					toggleButton2.setChecked(true);
+        					toggleButton4.setChecked(true);
     					
     				}
     				
