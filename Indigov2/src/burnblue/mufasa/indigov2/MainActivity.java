@@ -17,7 +17,6 @@ import android.widget.Button;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-//import java.net.SocketException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.telnet.TelnetClient;
@@ -25,44 +24,44 @@ import android.os.Handler;
 
 public class MainActivity extends Activity 
 {
+	// garage light 1
+	public static String modulePin4on =  "set sys output 0x0100 0x0100 \r";
+  	public static String modulePin4off = "set sys output 0x0000 0x0100 \r";
+
+	// garage door 1
+	public static String modulePin7on =  "set sys output 0x0080 0x0080 \r";
+  	public static String modulePin7off = "set sys output 0x0000 0x0080 \r";
+
+	// garage light 2
+	public static String modulePin9on =  "set sys output 0x0002 0x0002 \r";
+  	public static String modulePin9off = "set sys output 0x0000 0x0002 \r";
+
+  	// garage door 2
+	public static String modulePin11on =  "set sys output 0x4000 0x4000 \r";
+  	public static String modulePin11off = "set sys output 0x0000 0x4000 \r";
+
+  	// ad hoc module ip
+	public static String iv_adhoc = "169.254.1.1";
 	
-	private TelnetClient telnet = new TelnetClient();
-	private InputStream in;
-	private PrintStream out;
-	StringBuffer sb, sb1, sb2;
-	Handler mHandler = new Handler();
-	Handler mHandler2 = new Handler();
-	int len = 0;
-	int len1 = 0;
-	SharedPreferences ourData;
-	String SavedIp;
-	int SavedPort;
-	boolean l_worked;
+	// android app identifier
+	public static String iv_android = "Android> ";
+	
+	// wifly module identifier
+	public static String iv_wifly = "Wifly> ";
+
+	
+	
+	private SharedPreferences ourData;
+	private String SavedIp;
+	private int SavedPort;
 	
 	private ToggleButton toggleButton1, toggleButton2, toggleButton3, toggleButton4;
 	private ImageView image1, image2, image3, image4;
 	private Button Button1, Button2;
-	
-	public static String iv_adhoc = "169.254.1.1";
-	public static String iv_android = "Android> ";
-	public static String iv_wifly = "Wifly> ";
-	
-	// garage light 1
-	static String modulePin4on =  "set sys output 0x0100 0x0100 \r";
-  	static String modulePin4off = "set sys output 0x0000 0x0100 \r";
-
-	// garage door 1
-	static String modulePin7on =  "set sys output 0x0080 0x0080 \r";
-  	static String modulePin7off = "set sys output 0x0000 0x0080 \r";
-
-	// garage light 2
-	static String modulePin9on =  "set sys output 0x0002 0x0002 \r";
-  	static String modulePin9off = "set sys output 0x0000 0x0002 \r";
-
-  	// garage door 2
-	static String modulePin11on =  "set sys output 0x4000 0x4000 \r";
-  	static String modulePin11off = "set sys output 0x0000 0x4000 \r";
-  	  	
+  	
+	public Handler mHandler = new Handler();
+	public Handler mHandler2 = new Handler();
+		
 	// basically the android main function
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -186,8 +185,8 @@ public class MainActivity extends Activity
     		{
       			try
       			{
-      				telnet.setConnectTimeout(250);
-      				telnet.connect(SavedIp, SavedPort);
+      				l_telnet.setConnectTimeout(250);
+      				l_telnet.connect(SavedIp, SavedPort);
       			}
       			catch ( java.net.SocketTimeoutException e)
       			{
@@ -204,6 +203,7 @@ public class MainActivity extends Activity
       					toggleButton2.setChecked(true);
       				}
 
+    				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
       			}
       			catch ( java.net.UnknownHostException e)
       			{
@@ -220,6 +220,7 @@ public class MainActivity extends Activity
       					toggleButton2.setChecked(true);
       				}
 
+      				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
       			}
       			catch ( Exception e)
       			{
@@ -227,10 +228,10 @@ public class MainActivity extends Activity
       			}
 
 
-      			if (telnet.isConnected())
+      			if (l_telnet.isConnected())
       			{		
-      				in = telnet.getInputStream();			
-      				out = new PrintStream(telnet.getOutputStream());
+      				l_in = l_telnet.getInputStream();			
+      				l_out = new PrintStream(l_telnet.getOutputStream());
 
       				Thread mThread = new Thread(new Runnable() 
       				{
@@ -238,142 +239,85 @@ public class MainActivity extends Activity
       					{
       						try 
       						{
-      							sb = new StringBuffer();						
-      							do 
-      							{
-      								System.out.println( iv_android + "Starting handshake: ip: " + SavedIp );						
+      						     // handshake with wifly module
+      						     handshake( l_in, l_out);
 
-      								do  
-      								{
-      									len = in.read();
-      									String s = Character.toString((char)len);								
-      									sb.append( s );								
+      						     // get prompt from wifly module
+      						     getPrompt( l_in );	
 
-      								} while ( !sb.toString().equals("*HELLO*") );
+      						     // send command to pulse pin 7 on
+      						     sendCommand( modulePin7on, l_out);
 
+      						     // get prompt from wifly module
+      						     getPrompt( l_in );
 
-      								System.out.println( iv_android + "Received: " + sb );
+      						     // send command to pulse pin 7 off
+      						     sendCommand( modulePin7off, l_out );
 
-      								out.println("$$$");
-      								out.flush();
+      						     // get prompt from wifly module
+      						     getPrompt( l_in );
 
-      								out.println("\r");
-      								out.flush();
+      						     // if we have gotten to this point everything should have worked!!
+      						     l_worked = true;
 
-      								try 
-      								{
-      									TimeUnit.MILLISECONDS.sleep(250);				
-      								}
-      								catch (InterruptedException e) 
-      								{
-      									e.printStackTrace();
-      								}
+      						     // lets disconnect to allow any new connections to work
+      						     disconnect( l_telnet, l_in, l_out);	
 
-      								StringBuffer sb1 = new StringBuffer();
-      								len = 0;
-      								do 
-      								{
-      									len = in.read();			
-      									String s = Character.toString((char)len);			
-      									sb1.append( s );			
+      						     MainActivity.this.mHandler.post(new Runnable()
+      						     {
+      						    	 public void run() 
+      						    	 {
+      						    		 if ( l_worked )
+      						    		 {
+      						    			 if (toggleButton1.getText().equals("open"))
+      						    			 {
+      						    				 image1.setImageResource(R.drawable.garage_opened);
+      						    				 toggleButton2.setChecked(true);
+      						    				 image2.setImageResource(R.drawable.light_on);
+      						    			 }
+      						    			 else
+      						    			 {
+      						    				 image1.setImageResource(R.drawable.garage_closed);
+      						    				 toggleButton2.setChecked(true);
+      						    				 image2.setImageResource(R.drawable.light_on);
+      						    			 }
+      						    		 }
+      						    	 }
+      						     });
+      						     
+     							MainActivity.this.mHandler2.post(new Runnable()
+     							{
+     								public void run() 
+     								{
+     									int l_cnt = 0;
+     									
+     									do
+     									{
+     										try 
+     										{
+     											TimeUnit.SECONDS.sleep(1);
+     										}
+     										catch ( Exception e)
+     										{
+     										
+     										}
+     										
+     										l_cnt++;
+     									} while (l_cnt < 10);
+     									
+     									// check if everything worked
+     									if ( l_worked )
+     									{
+     										if (toggleButton2.getText().equals("on"))
+     										{
+     											toggleButton2.setChecked(false);
+     											image2.setImageResource(R.drawable.light_off);
+     										}     										    			
+     									}
+     								}    								
+     							});
 
-      									if ( (sb1.length() > 2) && 
-      											(sb1.substring(sb1.length()-2)).equals("> ") )
-      										break;
-
-      								} while( true );
-
-      								System.out.println(iv_android + "HandShake Done, Sending:" + modulePin7on);
-
-      								out.println(modulePin7on);
-      								out.flush();		
-
-      								try 
-      								{
-      									TimeUnit.MILLISECONDS.sleep(250);				
-      								}
-      								catch (InterruptedException e) 
-      								{
-      									e.printStackTrace();
-      								}
-
-      								sb1.setLength(0);
-      								len = 0;
-      								do 
-      								{
-      									len = in.read();			
-      									String s = Character.toString((char)len);			
-      									sb1.append( s );			
-
-      									if ( (sb1.length() > 2) && 
-      											(sb1.substring(sb1.length()-2)).equals("> ") )
-      										break;
-
-      								} while( true );
-
-      								System.out.println( iv_wifly + sb1 );
-      								System.out.println( iv_android + "Sending second command: " + modulePin7off);
-
-      								out.println(modulePin7off);
-      								out.flush();		
-
-      								try 
-      								{
-      									TimeUnit.MILLISECONDS.sleep(500);				
-      								}
-      								catch (InterruptedException e) 
-      								{
-      									e.printStackTrace();
-      								}
-
-      								sb1.setLength(0);
-      								len = 0;
-
-      								do 
-      								{
-      									len = in.read();			
-      									String s = Character.toString((char)len);			
-      									sb1.append( s );			
-
-      									if ( (sb1.length() > 2) && 
-      											(sb1.substring(sb1.length()-2)).equals("> ") )
-      										break;
-
-      								} while( true );
-
-      								System.out.println( iv_wifly + sb1 );
-
-      								l_worked = true;
-
-      								disconnect(telnet, in, out);			
-
-      								System.out.println( iv_android + "communication done: ip: " + SavedIp );
-
-
-      								MainActivity.this.mHandler.post(new Runnable()
-      								{
-      									public void run() 
-      									{
-      										if ( l_worked )
-      										{
-      											if (toggleButton1.getText().equals("open"))
-      											{
-      												image1.setImageResource(R.drawable.garage_opened);
-      												toggleButton2.setChecked(true);
-      												image2.setImageResource(R.drawable.light_on);
-      											}
-      											else
-      											{
-      												image1.setImageResource(R.drawable.garage_closed);
-      												toggleButton2.setChecked(false);
-      												image2.setImageResource(R.drawable.light_off);
-      											}
-      										}
-      									}
-      								});
-
-      							} while ( false );
-
+      						     
       						} 
       						catch (IOException e) 
       						{
@@ -390,7 +334,7 @@ public class MainActivity extends Activity
     	});
    } 
    
-    // garage door light 1 button on click handler
+    // garage light 1 button on click handler
 	public void light1Button() 
 	{
 		toggleButton2 = (ToggleButton) findViewById(R.id.toggleButton2);
@@ -480,8 +424,7 @@ public class MainActivity extends Activity
     							{
     								public void run() 
     								{
-    									// check if everything worked, otherwise 
-    									// we have to return toggle button to original state
+    									// check if everything worked
     									if ( l_worked )
     									{
     										if (toggleButton2.getText().equals("on"))
@@ -493,7 +436,7 @@ public class MainActivity extends Activity
     											image2.setImageResource(R.drawable.light_off);
     										}    			
     									}
-    								}
+    								}    								
     							});
     						} 
     						catch (IOException e) 
@@ -511,8 +454,9 @@ public class MainActivity extends Activity
     	});
     	
    } 
-   
-   public void garageDoor2Button() 
+ 
+	// garage door 2 button on click handler
+	public void garageDoor2Button() 
    {
     	toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);
     	image3 = (ImageView) findViewById(R.id.imageView3);
@@ -522,262 +466,153 @@ public class MainActivity extends Activity
     	
     	toggleButton3.setOnClickListener(new OnClickListener() 
     	{
+    		TelnetClient l_telnet = new TelnetClient();
+ 		    InputStream l_in;
+ 		    PrintStream l_out;
+ 		    boolean l_worked = false;
+ 		     
       		public void onClick(View v) 
     		{
-    		
-      			try 
-    			{	
-    				l_worked = false;
-    				
-    				try
-    				{
-    					telnet.setConnectTimeout(250);
-    					telnet.connect(SavedIp, SavedPort);
-    				}
-    				catch ( java.net.SocketTimeoutException e)
-    				{
-    					System.out.println( iv_android + "connection failure: socket timeout" );
-    					
-    					//text.getText();
-						//text.append( iv_android + "connection failure: timeout" + toggleButton2.getText() + " \n" );
-    					
-    					if (toggleButton3.getText().equals("open"))
-    					{
-        					toggleButton3.setChecked(false);
-        					toggleButton4.setChecked(false);
-    					}
-        				else
-        				{
-        					toggleButton3.setChecked(true);
-        					toggleButton4.setChecked(true);
-        				}
-    					
-    				}
-    				catch ( java.net.UnknownHostException e)
-    				{
-    					System.out.println( iv_android + "connection failure: unknown host" );
-    					
-    					//text.getText();
-						//text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
-    					
-    					if (toggleButton3.getText().equals("open"))
-    					{
-        					toggleButton3.setChecked(false);
-        					toggleButton4.setChecked(false);
-    					}
-        				else
-        				{
-        					toggleButton3.setChecked(true);
-        					toggleButton4.setChecked(true);
-        				}
-    					
-    				}
-    				
-    				
-    				if (telnet.isConnected())
-    				{		
-    					in = telnet.getInputStream();			
-    					out = new PrintStream(telnet.getOutputStream());
-    				
-    					Thread mThread = new Thread(new Runnable() 
-    					{
-    						public void run() 
-    						{
-    							try 
-    							{
-    								sb = new StringBuffer();						
-    								do 
-    								{
-    									System.out.println( iv_android + "Starting handshake: ip: " + SavedIp );						
+      		     try
+      		     {
+      		    	 l_telnet.setConnectTimeout(250);
+      		    	 l_telnet.connect(SavedIp, SavedPort);
+      		     }
+      		     catch ( java.net.SocketTimeoutException e)
+      		     {
+      		    	 System.out.println( iv_android + "connection failure: socket timeout" );
 
-    									do  
-    									{
-    										len = in.read();
-    										String s = Character.toString((char)len);								
-    										sb.append( s );								
-    																									
-    									} while ( !sb.toString().equals("*HELLO*") );
-    								
-    								
-    									System.out.println( iv_android + "Received: " + sb );
-    								
-    									out.println("$$$");
-    									out.flush();
-    									
-    									out.println("\r");
-    									out.flush();
-    								   	
-    									try 
-    									{
-	    									TimeUnit.MILLISECONDS.sleep(250);				
-	    								}
-	    								catch (InterruptedException e) 
-	    								{
-	    									e.printStackTrace();
-	    								}
-    									
-	    								StringBuffer sb1 = new StringBuffer();
-	    								len = 0;
-	    								do 
-	    								{
-	    									len = in.read();			
-	    									String s = Character.toString((char)len);			
-	    									sb1.append( s );			
-	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-	    										
-	    									//if (sb1.length() > 2)
-	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-	    										
-	    									if ( (sb1.length() > 2) && 
-	    										(sb1.substring(sb1.length()-2)).equals("> ") )
-	    										break;
-	    										
-	    								} while( true );
-	    									
-	    								System.out.println(iv_android + "HandShake Done, Sending:" + modulePin11on);
-	
-	    								out.println(modulePin11on);
-	    								out.flush();		
-	    									
-	    								try 
-	    								{
-	    									TimeUnit.MILLISECONDS.sleep(250);				
-	    								}
-	    								catch (InterruptedException e) 
-	    								{
-	    									e.printStackTrace();
-	    								}
-	    								
-	    								sb1.setLength(0);
-	    								len = 0;
-	    								do 
-	    								{
-	    									len = in.read();			
-	    									String s = Character.toString((char)len);			
-	    									sb1.append( s );			
-	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-	    										
-	    									//if (sb1.length() > 2)
-	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-	    										
-	    									if ( (sb1.length() > 2) && 
-	    										(sb1.substring(sb1.length()-2)).equals("> ") )
-	    										break;
-	    										
-	    								} while( true );
-	    									
-	    								System.out.println( iv_wifly + sb1 );
-	    								System.out.println( iv_android + "Sending second command: " + modulePin11off);
-	
-	    								out.println(modulePin11off);
-	    								out.flush();		
-	    									
-	    								try 
-	    								{
-	    									TimeUnit.MILLISECONDS.sleep(500);				
-	    								}
-	    								catch (InterruptedException e) 
-	    								{
-	    									e.printStackTrace();
-	    								}
-	    										
-	    								sb1.setLength(0);
-	    								len = 0;
-	    								do 
-	    								{
-	    									len = in.read();			
-	    									String s = Character.toString((char)len);			
-	    									sb1.append( s );			
-	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-	    										
-	    									//if (sb1.length() > 2)
-	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-	    										
-	    									if ( (sb1.length() > 2) && 
-	    										(sb1.substring(sb1.length()-2)).equals("> ") )
-	    										break;
-	    										
-	    								} while( true );
-	    									
-	    								System.out.println( iv_wifly + sb1 );
-	    								
-	    								l_worked = true;
-	    								
-	    								disconnect( telnet, in, out );			
-	    								
-	    								System.out.println( iv_android + "communication done: ip: " + SavedIp );
-	    								
-	    								
-	    								MainActivity.this.mHandler.post(new Runnable()
-	    								{
-	    									public void run() 
-	    									{
-	    										if ( l_worked )
-	    	    				    			{
-	    									      	if (toggleButton3.getText().equals("open"))
-	    											{
-	    												image3.setImageResource(R.drawable.garage_opened);
-	    												toggleButton4.setChecked(true);
-	    												image4.setImageResource(R.drawable.light_on);
-	    											}
-	    											else
-	    											{
-	    												image3.setImageResource(R.drawable.garage_closed);
-	    												toggleButton4.setChecked(false);
-	    												image4.setImageResource(R.drawable.light_off);
-	    											}
-	    	    				    			}
-	    									}
-	    								});
-	    				    			    								
-	    							} while ( false );
-	    							
-	    						} 
-	    						catch (IOException e) 
-	    						{
-	    							e.printStackTrace();
-	    						}
-	    					}
-	    				});
-	    				
-    					mThread.start();
-    				}
-	    		}
-	    		catch (Exception e) 
-	    		{
-	    			e.printStackTrace();
-	    		}
+      		    	 if (toggleButton3.getText().equals("open"))
+      		    	 {
+      		    		 toggleButton3.setChecked(false);
+      		    		 toggleButton4.setChecked(false);
+      		    	 }
+      		    	 else
+      		    	 {
+      		    		 toggleButton3.setChecked(true);
+      		    		 toggleButton4.setChecked(true);
+      		    	 }
+
+      		    	Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+      		     }
+      		     catch ( java.net.UnknownHostException e)
+      		     {
+      		    	 System.out.println( iv_android + "connection failure: unknown host" );
+
+      		    	 if (toggleButton3.getText().equals("open"))
+      		    	 {
+      		    		 toggleButton3.setChecked(false);
+      		    		 toggleButton4.setChecked(false);
+      		    	 }
+      		    	 else
+      		    	 {
+      		    		 toggleButton3.setChecked(true);
+      		    		 toggleButton4.setChecked(true);
+      		    	 }
+
+       		    	Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+      		     }
+      		     catch ( Exception e)
+      		     {
+      		    	 System.out.println( iv_android + "unexpected exception hit" );
+      		     }
+
+      		     if (l_telnet.isConnected())
+      		     {		
+      		    	 l_in = l_telnet.getInputStream();			
+      		    	 l_out = new PrintStream(l_telnet.getOutputStream());
+
+      		    	 Thread mThread = new Thread(new Runnable() 
+      		    	 {
+      		    		 public void run() 
+      		    		 {
+      		    			 try 
+      		    			 {
+      		    			     // handshake with wifly module
+      		    			     handshake( l_in, l_out);
+
+      		    			     // get prompt from wifly module
+      		    			     getPrompt( l_in );	
+
+      		    			     // send command to pulse pin 11 on
+      		    			     sendCommand( modulePin11on, l_out);
+
+      		    			     // get prompt from wifly module
+      		    			     getPrompt( l_in );
+
+      		    			     // send command to pulse pin 11 off
+      		    			     sendCommand( modulePin11off, l_out );
+
+      		    			     // get prompt from wifly module
+      		    			     getPrompt( l_in );
+
+      		    			     // if we have gotten to this point everything should have worked!!
+      		    			     l_worked = true;
+
+      		    			     // lets disconnect to allow any new connections to work
+      		    			     disconnect( l_telnet, l_in, l_out);	
+
+      		    			     MainActivity.this.mHandler.post(new Runnable()
+      		    			     {
+      		    			    	 public void run() 
+      		    			    	 {
+      		    			    		 if ( l_worked )
+      		    			    		 {
+      		    			    			 if (toggleButton3.getText().equals("open"))
+      		    			    			 {
+      		    			    				 image3.setImageResource(R.drawable.garage_opened);
+      		    			    				 toggleButton4.setChecked(true);
+      		    			    				 image4.setImageResource(R.drawable.light_on);
+      		    			    			 }
+      		    			    			 else
+      		    			    			 {
+      		    			    				 image3.setImageResource(R.drawable.garage_closed);
+      		    			    				 toggleButton4.setChecked(false);
+      		    			    				 image4.setImageResource(R.drawable.light_off);
+      		    			    			 }
+      		    			    		 }
+      		    			    	 }
+      		    			     });
+		    				 
+      		    			 } 
+      		    			 catch (IOException e) 
+      		    			 {
+      		    				 e.printStackTrace();
+      		    			 }
+      		    		 }
+      		    	 });
+
+      		    	 mThread.start();
+      		     }
     		}
  
     	});
    } 
    
-   public void light2Button() 
-   {
- 
-		toggleButton4 = (ToggleButton) findViewById(R.id.toggleButton4);
+	// garage light 2 button on click handler
+	public void light2Button() 
+	{
+ 		toggleButton4 = (ToggleButton) findViewById(R.id.toggleButton4);
      	image4 = (ImageView) findViewById(R.id.imageView4);
 
     	toggleButton4.setOnClickListener(new OnClickListener() 
     	{
-  
+    		TelnetClient l_telnet = new TelnetClient();
+    	    InputStream l_in;
+    	    PrintStream l_out;
+    	    boolean l_worked = false;
+    		
     		public void onClick(View v) 
     		{
-    			try 
-    			{	
-    				l_worked = false;
     				
     				try
     				{
-    					telnet.setConnectTimeout(250);
-    					telnet.connect(SavedIp, SavedPort);
+    					l_telnet.setConnectTimeout(250);
+    					l_telnet.connect(SavedIp, SavedPort);
     				}
     				catch ( java.net.SocketTimeoutException e)
     				{
     					System.out.println( iv_android + "connection failure: socket timeout" );
-    					
-    					//text.getText();
-						//text.append( iv_android + "connection failure: timeout" + toggleButton2.getText() + " \n" );
     					
     					if (toggleButton4.getText().equals("on"))
         					toggleButton4.setChecked(false);
@@ -789,21 +624,22 @@ public class MainActivity extends Activity
     				{
     					System.out.println( iv_android + "connection failure: unknown host" );
     					
-    					//text.getText();
-						//text.append( iv_android + "connection failure" + toggleButton2.getText() + " \n" );
-    					
     					if (toggleButton4.getText().equals("on"))
         					toggleButton4.setChecked(false);
         				else
         					toggleButton4.setChecked(true);
     					
     				}
+    			     catch ( Exception e)
+    			     {
+    			    	 System.out.println( iv_android + "unexpected exception hit" );
+    			     }
     				
     				
-    				if (telnet.isConnected())
+    				if (l_telnet.isConnected())
     				{		
-    					in = telnet.getInputStream();			
-    					out = new PrintStream(telnet.getOutputStream());
+    					l_in = l_telnet.getInputStream();			
+    					l_out = new PrintStream(l_telnet.getOutputStream());
     				
     					Thread mThread = new Thread(new Runnable() 
     					{
@@ -811,149 +647,47 @@ public class MainActivity extends Activity
     						{
     							try 
     							{
-    								sb = new StringBuffer();						
-    								do 
-    								{
-    									System.out.println( iv_android + "Starting handshake: ip: " + SavedIp );						
+    								// handshake with wifly module
+    							    handshake( l_in, l_out);
 
-    									do  
-    									{
-    										len = in.read();
-    										String s = Character.toString((char)len);								
-    										sb.append( s );								
-    																									
-    									} while ( !sb.toString().equals("*HELLO*") );
-    								
-    								
-    									System.out.println( iv_android + "Received: " + sb );
-    								
-    									out.println("$$$");
-    									out.flush();
-    									
-    									out.println("\r");
-    									out.flush();
-    								   	
-    									try 
-    									{
-	    									TimeUnit.MILLISECONDS.sleep(250);				
-	    								}
-	    								catch (InterruptedException e) 
-	    								{
-	    									e.printStackTrace();
-	    								}
-    									
-	    								StringBuffer sb1 = new StringBuffer();
-	    								len = 0;
-	    								do 
-	    								{
-	    									len = in.read();			
-	    									String s = Character.toString((char)len);			
-	    									sb1.append( s );			
-	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-	    										
-	    									//if (sb1.length() > 2)
-	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-	    										
-	    									if ( (sb1.length() > 2) && 
-	    										(sb1.substring(sb1.length()-2)).equals("> ") )
-	    										break;
-	    										
-	    								} while( true );
-	    									
-	    								System.out.println(iv_android + "HandShake Done, Sending:" + modulePin9on);
-	
-	    								out.println(modulePin9on);
-	    								out.flush();		
-	    									
-	    								try 
-	    								{
-	    									TimeUnit.MILLISECONDS.sleep(250);				
-	    								}
-	    								catch (InterruptedException e) 
-	    								{
-	    									e.printStackTrace();
-	    								}
+    							    // get prompt from wifly module
+    							    getPrompt( l_in );	
+
+    							    // send command to pulse pin 9 on
+    							    sendCommand( modulePin9on, l_out);
+
+    							    // get prompt from wifly module
+    							    getPrompt( l_in );
+
+    							    // send command to pulse pin 9 off
+    							    sendCommand( modulePin9off, l_out );
+
+    							    // get prompt from wifly module
+    							    getPrompt( l_in );
+
+    							    // if we have gotten to this point everything should have worked!!
+    							    l_worked = true;
+
+    							    // lets disconnect to allow any new connections to work
+    							    disconnect( l_telnet, l_in, l_out);	
 	    								
-	    								sb1.setLength(0);
-	    								len = 0;
-	    								do 
-	    								{
-	    									len = in.read();			
-	    									String s = Character.toString((char)len);			
-	    									sb1.append( s );			
-	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-	    										
-	    									//if (sb1.length() > 2)
-	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-	    										
-	    									if ( (sb1.length() > 2) && 
-	    										(sb1.substring(sb1.length()-2)).equals("> ") )
-	    										break;
-	    										
-	    								} while( true );
-	    									
-	    								System.out.println( iv_wifly + sb1 );
-	    								System.out.println( iv_android + "Sending second command: " + modulePin9off);
-	
-	    								out.println(modulePin9off);
-	    								out.flush();		
-	    									
-	    								try 
-	    								{
-	    									TimeUnit.MILLISECONDS.sleep(500);				
-	    								}
-	    								catch (InterruptedException e) 
-	    								{
-	    									e.printStackTrace();
-	    								}
-	    										
-	    								sb1.setLength(0);
-	    								len = 0;
-	    								do 
-	    								{
-	    									len = in.read();			
-	    									String s = Character.toString((char)len);			
-	    									sb1.append( s );			
-	    									//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-	    										
-	    									//if (sb1.length() > 2)
-	    									//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-	    										
-	    									if ( (sb1.length() > 2) && 
-	    										(sb1.substring(sb1.length()-2)).equals("> ") )
-	    										break;
-	    										
-	    								} while( true );
-	    									
-	    								System.out.println( iv_wifly + sb1 );
-	    								
-	    								l_worked = true;
-	    								
-	    								disconnect(telnet, in, out);			
-	    								
-	    								System.out.println( iv_android + "communication done: ip: " + SavedIp );
-	    								
-	    								
-	    								MainActivity.this.mHandler.post(new Runnable()
-	    								{
-	    									public void run() 
-	    									{
-	    										if ( l_worked )
-	    	    				    			{
-	    	    				    				if (toggleButton4.getText().equals("on"))
-	    	    				    				{
-	    	    				    					image4.setImageResource(R.drawable.light_on);
-	    	    				    				}
-	    	    				    				else
-	    	    				    				{
-	    	    				    					image4.setImageResource(R.drawable.light_off);
-	    	    				    				}    			
-	    	    				    			}
-	    									}
-	    								});
-	    				    			    								
-	    							} while ( false );
-	    							
+    							    MainActivity.this.mHandler.post(new Runnable()
+    							    {
+    							    	public void run() 
+    							    	{
+    							    		if ( l_worked )
+    							    		{
+    							    			if (toggleButton4.getText().equals("on"))
+    							    			{
+    							    				image4.setImageResource(R.drawable.light_on);
+    							    			}
+    							    			else
+    							    			{
+    							    				image4.setImageResource(R.drawable.light_off);
+    							    			}    			
+    							    		}
+    							    	}
+    							    });
 	    						} 
 	    						catch (IOException e) 
 	    						{
@@ -964,32 +698,29 @@ public class MainActivity extends Activity
 	    				
     					mThread.start();
     				}
-	    		}
-	    		catch (Exception e) 
-	    		{
-	    			e.printStackTrace();
-	    		}
-
     		}
  
     	});
    } 
 
-   public void setupButton() 
+	// setup up button on click handler
+	public void setupButton() 
    {
-	   	// button1 on the mainactivity is the options button
+		final TelnetClient l_telnet = new TelnetClient();
+
+	   	// button1 on the main activity is the options button
        	Button1 = (Button) findViewById(R.id.button1);
-      	
+     	
 		try 
 		{
 			//setting connection timeout to something really small
 			//so we can check quickly if module is in adhoc mode
-			telnet.setConnectTimeout(125);
+			l_telnet.setConnectTimeout(125);
 		
 			try
 			{
 				// try to connect to adhoc ip
-				telnet.connect(iv_adhoc, SavedPort);
+				l_telnet.connect(iv_adhoc, SavedPort);
 			}
 			catch ( java.net.SocketTimeoutException e)
 			{
@@ -997,58 +728,28 @@ public class MainActivity extends Activity
 				System.out.println( iv_android + "socket timed out on adhoc mode ip, "+ iv_adhoc +", hiding setup menu button ");
 			}
 			
-			if (telnet.isConnected())
+			if (l_telnet.isConnected())
 			{
 				// we are in adhoc mode so we will NOT disable the setup menu
 				System.out.println( iv_android + "We are in adhoc mode!!!?" );
 			
-				in = telnet.getInputStream();			
-				out = new PrintStream(telnet.getOutputStream());
-			
 				Thread mThread = new Thread(new Runnable() 
 				{
+			        InputStream l_in = l_telnet.getInputStream();			
+					PrintStream l_out = new PrintStream(l_telnet.getOutputStream());
+					
 					public void run() 
 					{
 						try 
 						{
-							sb = new StringBuffer();						
-							do 
-							{
-								System.out.println( iv_android + "starting handshake" );						
+						     // handshake with wifly module
+						     handshake( l_in, l_out);
 
-								do  
-								{
-									len = in.read();
-									String s = Character.toString((char)len);								
-									sb.append( s );								
-																								
-								} while ( !sb.toString().equals("*HELLO*") );
-							
-							
-		//						System.out.println( sb );
-							
-							//	mycommand();
-								out.println("$$$");
-								out.flush();
-								
-								out.println("\r");
-								out.flush();
-							   	
-								try 
-								{
-									TimeUnit.MILLISECONDS.sleep(250);				
-								}
-								catch (InterruptedException e) 
-								{
-									e.printStackTrace();
-								}
-
-								disconnect(telnet, in, out);			
-							
-								System.out.println( iv_android + "communication done" );
-							
-							} while ( false );
+						     // get prompt from wifly module
+						     getPrompt( l_in );								
 						
+						     // lets disconnect to allow any new connections to work
+						     disconnect( l_telnet, l_in, l_out);
 						} 
 						catch (IOException e) 
 						{
@@ -1079,7 +780,8 @@ public class MainActivity extends Activity
     	});
    } 
    
-   public void optionsButton() 
+	// options button on click handler
+	public void optionsButton() 
    {
        	Button2 = (Button) findViewById(R.id.button2);       	
       	
@@ -1092,60 +794,6 @@ public class MainActivity extends Activity
     	});
    } 
 
-   // generic command interface to send a telnet command
-   // note currently not being used
-   private void mycommand() throws IOException 
-   {
-	   System.out.println( "mycommand start \n" );
-	   out.println("$$$");
-	   out.flush();
-		
-	   out.println("\r");
-	   out.flush();
-		
-	   try 
-	   {
-		   TimeUnit.SECONDS.sleep(1);
-	   } 
-	   catch (InterruptedException e1) 
-	   {			
-		   e1.printStackTrace();
-	   }
-		
-		StringBuffer sb1 = new StringBuffer();
-		len = 0;
-		do 
-		{
-			len = in.read();			
-			String s = Character.toString((char)len);			
-			sb1.append( s );			
-			//System.out.println ( "byte:" + len + " char:" + (char)len + " len:" + sb1.length());
-			
-			//if (sb1.length() > 2)
-				//System.out.println("length:"+ sb1.length()+" substring:" + sb1.substring(sb1.length()-2) );
-			
-			if ( (sb1.length() > 2) && 
-				 (sb1.substring(sb1.length()-2)).equals("> ") )
-				break;
-			
-		} while( true );
-		
-		System.out.println(modulePin7on);
-		out.println(modulePin7on);
-		out.flush();		
-		
-		try 
-		{
-			TimeUnit.SECONDS.sleep(1);				
-		}
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-		}
-			
-		//disconnect();			
-		System.out.println( "mycommand end \n" );
-	}
 
    
 }
