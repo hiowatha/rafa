@@ -5,10 +5,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Button;
@@ -58,6 +60,8 @@ public class MainActivity extends Activity
 	private ToggleButton toggleButton1, toggleButton2, toggleButton3, toggleButton4;
 	private ImageView image1, image2, image3, image4;
 	private Button Button1, Button2;
+	
+	private TextView textview5;
   	
 	public Handler mHandler = new Handler();
 	public Handler mHandler2 = new Handler();
@@ -74,6 +78,8 @@ public class MainActivity extends Activity
     	SavedIp = ourData.getString(Options.moduleip, "169.254.1.1");
         SavedPort = Integer.parseInt(ourData.getString(Options.moduleport, "2000" ));
     	
+        textview5 = (TextView) findViewById(R.id.textView5);
+        
     	garageDoor1Button();
     	light1Button();
     	garageDoor2Button();
@@ -104,8 +110,9 @@ public class MainActivity extends Activity
 	}
 
     // get wifly prompt (use only after handshake, also needed after sending a command)
-    public void getPrompt( InputStream i_in ) throws IOException
+    public boolean getPrompt( InputStream i_in ) throws IOException
     {
+    	boolean l_rc = false;
     	StringBuffer l_sb = new StringBuffer();
     	int l_len = 0;
     	    	
@@ -117,17 +124,24 @@ public class MainActivity extends Activity
 
     		if ( (l_sb.length() > 2) && 
     				(l_sb.substring(l_sb.length()-2)).equals("> ") )
+    		{
+    			l_rc = true;
     			break;
+    		}
 
     	} while( true );
     	
     	System.out.println(iv_wifly + l_sb);
     	System.out.println(iv_android + "Prompt acquired, wifly is ready to receive");
+    	
+    	return l_rc;
     }
     
     // handshake with wifly (must be done prior to any real commands being sent)
-    public void handshake( InputStream i_in, PrintStream i_out ) throws IOException
+    public boolean handshake( InputStream i_in, PrintStream i_out ) throws IOException
     {
+    	boolean l_rc = false;
+    	
     	StringBuffer l_sb = new StringBuffer();
     	int l_len = 0;
     	
@@ -141,7 +155,7 @@ public class MainActivity extends Activity
 
     	} while ( !l_sb.toString().equals("*HELLO*") );
 
-
+    	
     	System.out.println( iv_android + "Received: " + l_sb );
 
     	i_out.println("$$$");
@@ -149,19 +163,30 @@ public class MainActivity extends Activity
 
     	i_out.println("\r");
     	i_out.flush();
+
+    	if ( (l_sb.toString().equals("*HELLO*")) && !i_out.checkError() )
+    		l_rc = true;
     	
     	System.out.println(iv_android + "HandShake Done");
+    	
+    	return l_rc;
     }
     
     // send a command to wifly module (use only after handshake, and follow it with a getPrompt)
-    public void sendCommand( String i_cmd, PrintStream i_out )
+    public boolean sendCommand( String i_cmd, PrintStream i_out )
     {
+    	boolean l_rc = false;
 		System.out.println(iv_android + "Sending:" + i_cmd);
 
 		i_out.println(i_cmd);
 		i_out.flush();		
-   }
-    
+		
+		if (!i_out.checkError())
+			l_rc = true;
+		
+		return l_rc;
+    }
+        
     // garage door 1 button on click handler
     public void garageDoor1Button() 
     {
@@ -203,7 +228,7 @@ public class MainActivity extends Activity
       					toggleButton2.setChecked(true);
       				}
 
-    				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+    				//Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
       			}
       			catch ( java.net.UnknownHostException e)
       			{
@@ -220,7 +245,7 @@ public class MainActivity extends Activity
       					toggleButton2.setChecked(true);
       				}
 
-      				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+      				//Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
       			}
       			catch ( Exception e)
       			{
@@ -232,6 +257,7 @@ public class MainActivity extends Activity
       			{		
       				l_in = l_telnet.getInputStream();			
       				l_out = new PrintStream(l_telnet.getOutputStream());
+      				
 
       				Thread mThread = new Thread(new Runnable() 
       				{
@@ -239,21 +265,91 @@ public class MainActivity extends Activity
       					{
       						try 
       						{
+   								final boolean l_status1;
+   								final boolean l_status2;
+   								final boolean l_status3;
+      							
       						     // handshake with wifly module
-      						     handshake( l_in, l_out);
-
+      						    l_status1 = handshake( l_in, l_out);
+      						    
+      						    
+         											    
+      						     /*try 
+      						     {
+      						    	 TimeUnit.MICROSECONDS.sleep(250);
+      						     }
+      						     catch ( Exception e)
+      						     {
+      						    	 
+      						     }*/
+      						     
       						     // get prompt from wifly module
-      						     getPrompt( l_in );	
+      						     l_status2 = getPrompt( l_in );
+      						     
+      						     /*try 
+      						     {
+      						    	 TimeUnit.MICROSECONDS.sleep(250);
+      						     }
+      						     catch ( Exception e)
+      						     {
+      						    	 
+      						     }*/
 
       						     // send command to pulse pin 7 on
-      						     sendCommand( modulePin7on, l_out);
+      						     l_status3 = sendCommand( modulePin7on, l_out);
 
+      						     /*try 
+      						     {
+      						    	 TimeUnit.MICROSECONDS.sleep(250);
+      						     }
+      						     catch ( Exception e)
+      						     {
+      						    	 
+      						     }*/
+      						    
+/*      						   MainActivity.this.mHandler2.post(new Runnable()
+    							{
+    								public void run() 
+    								{
+    									textview5.getText();
+    									textview5.append( iv_android + "handshake done: " + l_status1 + " \n" );
+    									textview5.getText();
+    	      						    textview5.append( iv_android + "getPrompt done: " + l_status2 + " \n" );
+    	      						    textview5.getText();
+    	      						    textview5.append( iv_android + "sendCommand done: " + l_status3 + " \n" );
+		
+    								}    								
+    							});*/
+     	
+      						     
+      						     
       						     // get prompt from wifly module
       						     getPrompt( l_in );
 
+      						     
+      						     try 
+      						     {
+      						    	 TimeUnit.MICROSECONDS.sleep(250*400);
+      						     }
+      						     catch ( Exception e)
+      						     {
+      						    	 
+      						     }
+
+      						     
       						     // send command to pulse pin 7 off
       						     sendCommand( modulePin7off, l_out );
 
+     						    /* try 
+      						     {
+      						    	 TimeUnit.MICROSECONDS.sleep(250);
+      						     }
+      						     catch ( Exception e)
+      						     {
+      						    	 
+      						     }*/
+
+      						     
       						     // get prompt from wifly module
       						     getPrompt( l_in );
 
@@ -285,7 +381,7 @@ public class MainActivity extends Activity
       						    	 }
       						     });
       						     
-     							MainActivity.this.mHandler2.post(new Runnable()
+     						/*	MainActivity.this.mHandler2.post(new Runnable()
      							{
      								public void run() 
      								{
@@ -315,7 +411,7 @@ public class MainActivity extends Activity
      										}     										    			
      									}
      								}    								
-     							});
+     							});*/
 
       						     
       						} 
