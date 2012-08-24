@@ -171,8 +171,51 @@ public class MainActivity extends Activity
     	
     	return l_rc;
     }
+
+    // send command but also read the output (must be done after handshake)
+    public int sendCommandAndRead( InputStream i_in, PrintStream i_out ) throws IOException
+    {
+    	int l_rc = 0;
+    	int l_idx = 0;
+    	
+    	// send the command we want
+    	sendCommand( "show q 2 \r", i_out );
+
+    	// get prompt
+    	StringBuffer l_sb = new StringBuffer();
+    	int l_len = 0;
+    	    	
+    	do 
+    	{
+    		l_len = i_in.read();			
+    		String s = Character.toString((char)l_len);			
+    		l_sb.append( s );			
+
+    		if ( (l_sb.length() > 2) && 
+    				(l_sb.substring(l_sb.length()-2)).equals("> ") )
+    			break;
+
+    	} while( true );
+    	
+    	System.out.println(iv_wifly + l_sb);
+    	
+    	l_idx = l_sb.indexOf("8");
+    	
+    	System.out.println(iv_wifly + "length:" + l_sb.length() + "lastindex:" + l_idx );
+    	
+    	String l_tmp = l_sb.substring(l_idx+1, l_idx+6);
+    	
+    	System.out.println(iv_wifly + "lbuf:" + l_tmp  );
+  	  	    	
+  	  	l_rc = (Integer.parseInt(l_tmp, 16) / 1000 );
+  	  	
+    	return l_rc;
+    }
+    
+    
     
     // send a command to wifly module (use only after handshake, and follow it with a getPrompt)
+    // NOTE: all commands should end with \r!
     public boolean sendCommand( String i_cmd, PrintStream i_out )
     {
     	boolean l_rc = false;
@@ -187,6 +230,19 @@ public class MainActivity extends Activity
 		return l_rc;
     }
         
+    public void delayBetweenSends( int i_milliSeconds )
+    {
+    	try 
+    	{
+    		TimeUnit.MILLISECONDS.sleep( i_milliSeconds );
+    	}
+    	catch ( Exception e )
+    	{
+    		e.printStackTrace();
+    	}
+    }
+    
+    
     // garage door 1 button on click handler
     public void garageDoor1Button() 
     {
@@ -228,7 +284,7 @@ public class MainActivity extends Activity
       					toggleButton2.setChecked(true);
       				}
 
-    				//Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+    				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
       			}
       			catch ( java.net.UnknownHostException e)
       			{
@@ -245,7 +301,7 @@ public class MainActivity extends Activity
       					toggleButton2.setChecked(true);
       				}
 
-      				//Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+      				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
       			}
       			catch ( Exception e)
       			{
@@ -265,121 +321,56 @@ public class MainActivity extends Activity
       					{
       						try 
       						{
-   								final boolean l_status1;
-   								final boolean l_status2;
-   								final boolean l_status3;
       							
-      						     // handshake with wifly module
-      						    l_status1 = handshake( l_in, l_out);
-      						    
-      						    
-         											    
-      						     /*try 
-      						     {
-      						    	 TimeUnit.MICROSECONDS.sleep(250);
-      						     }
-      						     catch ( Exception e)
-      						     {
-      						    	 
-      						     }*/
+      							// handshake with wifly module
+      						    handshake( l_in, l_out);
+
+      						    // get prompt from wifly module
+      						    getPrompt( l_in );
       						     
-      						     // get prompt from wifly module
-      						     l_status2 = getPrompt( l_in );
-      						     
-      						     /*try 
-      						     {
-      						    	 TimeUnit.MICROSECONDS.sleep(250);
-      						     }
-      						     catch ( Exception e)
-      						     {
-      						    	 
-      						     }*/
+      						    // send command to pulse pin 7 on
+      						    sendCommand( modulePin7on, l_out);
 
-      						     // send command to pulse pin 7 on
-      						     l_status3 = sendCommand( modulePin7on, l_out);
+      						    // get prompt from wifly module
+      						    getPrompt( l_in );
 
-      						     /*try 
-      						     {
-      						    	 TimeUnit.MICROSECONDS.sleep(250);
-      						     }
-      						     catch ( Exception e)
-      						     {
-      						    	 
-      						     }*/
-      						    
-/*      						   MainActivity.this.mHandler2.post(new Runnable()
-    							{
-    								public void run() 
-    								{
-    									textview5.getText();
-    									textview5.append( iv_android + "handshake done: " + l_status1 + " \n" );
-    									textview5.getText();
-    	      						    textview5.append( iv_android + "getPrompt done: " + l_status2 + " \n" );
-    	      						    textview5.getText();
-    	      						    textview5.append( iv_android + "sendCommand done: " + l_status3 + " \n" );
-		
-    								}    								
-    							});*/
-     	
-      						     
-      						     
-      						     // get prompt from wifly module
-      						     getPrompt( l_in );
+      						    // Note: wifly requires at least some time to 
+      						    // saturate output pins to high 
+      						    delayBetweenSends(100);
 
-      						     
-      						     try 
-      						     {
-      						    	 TimeUnit.MICROSECONDS.sleep(250*400);
-      						     }
-      						     catch ( Exception e)
-      						     {
-      						    	 
-      						     }
+      						    // send command to pulse pin 7 off
+      						    sendCommand( modulePin7off, l_out );
 
-      						     
-      						     // send command to pulse pin 7 off
-      						     sendCommand( modulePin7off, l_out );
+      						    // get prompt from wifly module
+      						    getPrompt( l_in );
 
-     						    /* try 
-      						     {
-      						    	 TimeUnit.MICROSECONDS.sleep(250);
-      						     }
-      						     catch ( Exception e)
-      						     {
-      						    	 
-      						     }*/
+      						    // if we have gotten to this point everything should have worked!!
+      						    l_worked = true;
 
-      						     
-      						     // get prompt from wifly module
-      						     getPrompt( l_in );
+      						    // lets disconnect to allow any new connections to work
+      						    disconnect( l_telnet, l_in, l_out);	
 
-      						     // if we have gotten to this point everything should have worked!!
-      						     l_worked = true;
-
-      						     // lets disconnect to allow any new connections to work
-      						     disconnect( l_telnet, l_in, l_out);	
-
-      						     MainActivity.this.mHandler.post(new Runnable()
-      						     {
-      						    	 public void run() 
-      						    	 {
-      						    		 if ( l_worked )
-      						    		 {
-      						    			 if (toggleButton1.getText().equals("open"))
-      						    			 {
-      						    				 image1.setImageResource(R.drawable.garage_opened);
-      						    				 toggleButton2.setChecked(true);
-      						    				 image2.setImageResource(R.drawable.light_on);
-      						    			 }
-      						    			 else
-      						    			 {
-      						    				 image1.setImageResource(R.drawable.garage_closed);
-      						    				 toggleButton2.setChecked(true);
-      						    				 image2.setImageResource(R.drawable.light_on);
-      						    			 }
-      						    		 }
-      						    	 }
-      						     });
+      						    MainActivity.this.mHandler.post(new Runnable()
+      						    {
+      						    	public void run() 
+      						    	{
+      						    		if ( l_worked )
+      						    		{
+      						    			if (toggleButton1.getText().equals("open"))
+      						    			{
+      						    				image1.setImageResource(R.drawable.garage_opened);
+      						    				toggleButton2.setChecked(true);
+      						    				image2.setImageResource(R.drawable.light_on);
+      						    			}
+      						    			else
+      						    			{
+      						    				image1.setImageResource(R.drawable.garage_closed);
+      						    				toggleButton2.setChecked(true);
+      						    				image2.setImageResource(R.drawable.light_on);
+      						    			}
+      						    		}
+      						    	}
+      						    });
       						     
      						/*	MainActivity.this.mHandler2.post(new Runnable()
      							{
@@ -504,11 +495,18 @@ public class MainActivity extends Activity
     							// get prompt from wifly module    								
     							getPrompt( l_in );
 
+      						    // Note: wifly requires at least some time to 
+      						    // saturate output pins to high 
+      						    delayBetweenSends(100);
+    							
     							// send command to pulse pin 4 off
     							sendCommand( modulePin4off, l_out );
 
     							// get prompt from wifly module    								
     							getPrompt( l_in );
+    							
+    							// attempt to read value from module
+    							final int l_read = sendCommandAndRead( l_in, l_out );
 
     							// if we have gotten to this point everything should have worked!!
     							l_worked = true;
@@ -534,6 +532,34 @@ public class MainActivity extends Activity
     									}
     								}    								
     							});
+
+    							MainActivity.this.mHandler2.post(new Runnable()
+    							{
+    								public void run() 
+    								{
+    									if ( l_read > 100 )
+    									{
+    										textview5.setText("garage door 1 is closed");
+    										if (toggleButton1.getText().equals("open"))
+    										{
+    											image1.setImageResource(R.drawable.garage_closed);
+    											toggleButton1.setChecked(false);
+    										}
+    											
+    									}
+    									else
+    									{
+    										textview5.setText("garage door 1 is open");
+    										if (toggleButton1.getText().equals("close"))
+    										{
+    											image1.setImageResource(R.drawable.garage_opened);
+    											toggleButton1.setChecked(true);
+    										}
+    									}
+    									
+    								}    								
+    							});
+    							
     						} 
     						catch (IOException e) 
     						{
@@ -636,6 +662,10 @@ public class MainActivity extends Activity
       		    			     // get prompt from wifly module
       		    			     getPrompt( l_in );
 
+       						    // Note: wifly requires at least some time to 
+       						    // saturate output pins to high 
+       						    delayBetweenSends(100);
+      		    			     
       		    			     // send command to pulse pin 11 off
       		    			     sendCommand( modulePin11off, l_out );
 
@@ -754,6 +784,10 @@ public class MainActivity extends Activity
 
     							    // get prompt from wifly module
     							    getPrompt( l_in );
+    							    
+           						    // Note: wifly requires at least some time to 
+           						    // saturate output pins to high 
+           						    delayBetweenSends(100);
 
     							    // send command to pulse pin 9 off
     							    sendCommand( modulePin9off, l_out );
