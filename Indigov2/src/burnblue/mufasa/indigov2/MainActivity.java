@@ -1,6 +1,5 @@
 package burnblue.mufasa.indigov2;
 
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,44 +13,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Button;
-
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.net.telnet.TelnetClient;
 import android.os.Handler;
 
 public class MainActivity extends Activity 
 {
-	// garage light 1
-	public static String modulePin4on =  "set sys output 0x0100 0x0100 \r";
-  	public static String modulePin4off = "set sys output 0x0000 0x0100 \r";
-
-	// garage door 1
-	public static String modulePin7on =  "set sys output 0x0080 0x0080 \r";
-  	public static String modulePin7off = "set sys output 0x0000 0x0080 \r";
-
-	// garage light 2
-	public static String modulePin9on =  "set sys output 0x0002 0x0002 \r";
-  	public static String modulePin9off = "set sys output 0x0000 0x0002 \r";
-
-  	// garage door 2
-	public static String modulePin11on =  "set sys output 0x4000 0x4000 \r";
-  	public static String modulePin11off = "set sys output 0x0000 0x4000 \r";
-
   	// ad hoc module ip
 	public static String iv_adhoc = "169.254.1.1";
+	
+	// ad hoc default port
+	public static String iv_adhocPort = "2000";
 	
 	// android app identifier
 	public static String iv_android = "Android> ";
 	
 	// wifly module identifier
 	public static String iv_wifly = "Wifly> ";
-
-	
 	
 	private SharedPreferences ourData;
 	private String SavedIp;
@@ -75,8 +52,8 @@ public class MainActivity extends Activity
         setContentView(R.layout.activity_main);
     
         ourData = getSharedPreferences(Options.fileName, 0);
-    	SavedIp = ourData.getString(Options.moduleip, "169.254.1.1");
-        SavedPort = Integer.parseInt(ourData.getString(Options.moduleport, "2000" ));
+    	SavedIp = ourData.getString(Options.moduleip, iv_adhoc );
+        SavedPort = Integer.parseInt(ourData.getString(Options.moduleport, iv_adhocPort ));
     	
         textview5 = (TextView) findViewById(R.id.textView5);
         
@@ -87,161 +64,7 @@ public class MainActivity extends Activity
 
     	setupButton();
     	optionsButton();
-    	
-    	
-    	
-    	//wiflyConnect l_tmp = new wiflyConnect();
-    	//l_tmp.sendCommand("get ip a \r");
-    	
-    	//if ( l_tmp.l_save )
-    	//    		((Button)findViewById(R.id.button1)).setEnabled(false);
-    	
-    	//	System.out.println("l_options filename: " + Options.fileName + "\n");
     }
-   
-    // telnet interface disconnect method
-    public void disconnect(TelnetClient i_client, InputStream i_in, PrintStream i_out) throws IOException 
-	{
-		i_in.close();
-		i_out.close();
-		i_client.disconnect();
-		
-		System.out.println( iv_android + "communication done: ip: " + SavedIp );
-	}
-
-    // get wifly prompt (use only after handshake, also needed after sending a command)
-    public boolean getPrompt( InputStream i_in ) throws IOException
-    {
-    	boolean l_rc = false;
-    	StringBuffer l_sb = new StringBuffer();
-    	int l_len = 0;
-    	    	
-    	do 
-    	{
-    		l_len = i_in.read();			
-    		String s = Character.toString((char)l_len);			
-    		l_sb.append( s );			
-
-    		if ( (l_sb.length() > 2) && 
-    				(l_sb.substring(l_sb.length()-2)).equals("> ") )
-    		{
-    			l_rc = true;
-    			break;
-    		}
-
-    	} while( true );
-    	
-    	System.out.println(iv_wifly + l_sb);
-    	System.out.println(iv_android + "Prompt acquired, wifly is ready to receive");
-    	
-    	return l_rc;
-    }
-    
-    // handshake with wifly (must be done prior to any real commands being sent)
-    public boolean handshake( InputStream i_in, PrintStream i_out ) throws IOException
-    {
-    	boolean l_rc = false;
-    	
-    	StringBuffer l_sb = new StringBuffer();
-    	int l_len = 0;
-    	
-    	System.out.println( iv_android + "Starting handshake: ip: " + SavedIp );						
-
-    	do  
-    	{
-    		l_len = i_in.read();
-    		String s = Character.toString((char)l_len);								
-    		l_sb.append( s );								
-
-    	} while ( !l_sb.toString().equals("*HELLO*") );
-
-    	
-    	System.out.println( iv_android + "Received: " + l_sb );
-
-    	i_out.println("$$$");
-    	i_out.flush();
-
-    	i_out.println("\r");
-    	i_out.flush();
-
-    	if ( (l_sb.toString().equals("*HELLO*")) && !i_out.checkError() )
-    		l_rc = true;
-    	
-    	System.out.println(iv_android + "HandShake Done");
-    	
-    	return l_rc;
-    }
-
-    // send command but also read the output (must be done after handshake)
-    public int sendCommandAndRead( InputStream i_in, PrintStream i_out ) throws IOException
-    {
-    	int l_rc = 0;
-    	int l_idx = 0;
-    	
-    	// send the command we want
-    	sendCommand( "show q 2 \r", i_out );
-
-    	// get prompt
-    	StringBuffer l_sb = new StringBuffer();
-    	int l_len = 0;
-    	    	
-    	do 
-    	{
-    		l_len = i_in.read();			
-    		String s = Character.toString((char)l_len);			
-    		l_sb.append( s );			
-
-    		if ( (l_sb.length() > 2) && 
-    				(l_sb.substring(l_sb.length()-2)).equals("> ") )
-    			break;
-
-    	} while( true );
-    	
-    	System.out.println(iv_wifly + l_sb);
-    	
-    	l_idx = l_sb.indexOf("8");
-    	
-    	System.out.println(iv_wifly + "length:" + l_sb.length() + "lastindex:" + l_idx );
-    	
-    	String l_tmp = l_sb.substring(l_idx+1, l_idx+6);
-    	
-    	System.out.println(iv_wifly + "lbuf:" + l_tmp  );
-  	  	    	
-  	  	l_rc = (Integer.parseInt(l_tmp, 16) / 1000 );
-  	  	
-    	return l_rc;
-    }
-    
-    
-    
-    // send a command to wifly module (use only after handshake, and follow it with a getPrompt)
-    // NOTE: all commands should end with \r!
-    public boolean sendCommand( String i_cmd, PrintStream i_out )
-    {
-    	boolean l_rc = false;
-		System.out.println(iv_android + "Sending:" + i_cmd);
-
-		i_out.println(i_cmd);
-		i_out.flush();		
-		
-		if (!i_out.checkError())
-			l_rc = true;
-		
-		return l_rc;
-    }
-        
-    public void delayBetweenSends( int i_milliSeconds )
-    {
-    	try 
-    	{
-    		TimeUnit.MILLISECONDS.sleep( i_milliSeconds );
-    	}
-    	catch ( Exception e )
-    	{
-    		e.printStackTrace();
-    	}
-    }
-    
     
     // garage door 1 button on click handler
     public void garageDoor1Button() 
@@ -257,17 +80,14 @@ public class MainActivity extends Activity
       	// garage door 1 clicked
     	toggleButton1.setOnClickListener(new OnClickListener() 
     	{
-    		TelnetClient l_telnet = new TelnetClient();
-    		InputStream l_in;
-    		PrintStream l_out;
+    		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort);
     		boolean l_worked = false;
     		
       		public void onClick(View v) 
     		{
       			try
       			{
-      				l_telnet.setConnectTimeout(250);
-      				l_telnet.connect(SavedIp, SavedPort);
+      				l_wifly.connect();
       			}
       			catch ( java.net.SocketTimeoutException e)
       			{
@@ -308,12 +128,8 @@ public class MainActivity extends Activity
       				System.out.println( iv_android + "unexpected exception hit" );    					
       			}
 
-
-      			if (l_telnet.isConnected())
+      			if (l_wifly.isConnected())
       			{		
-      				l_in = l_telnet.getInputStream();			
-      				l_out = new PrintStream(l_telnet.getOutputStream());
-      				
 
       				Thread mThread = new Thread(new Runnable() 
       				{
@@ -321,34 +137,10 @@ public class MainActivity extends Activity
       					{
       						try 
       						{
-      							
-      							// handshake with wifly module
-      						    handshake( l_in, l_out);
-
-      						    // get prompt from wifly module
-      						    getPrompt( l_in );
-      						     
-      						    // send command to pulse pin 7 on
-      						    sendCommand( modulePin7on, l_out);
-
-      						    // get prompt from wifly module
-      						    getPrompt( l_in );
-
-      						    // Note: wifly requires at least some time to 
-      						    // saturate output pins to high 
-      						    delayBetweenSends(100);
-
-      						    // send command to pulse pin 7 off
-      						    sendCommand( modulePin7off, l_out );
-
-      						    // get prompt from wifly module
-      						    getPrompt( l_in );
+      							l_wifly.SendAll(7);
 
       						    // if we have gotten to this point everything should have worked!!
       						    l_worked = true;
-
-      						    // lets disconnect to allow any new connections to work
-      						    disconnect( l_telnet, l_in, l_out);	
 
       						    MainActivity.this.mHandler.post(new Runnable()
       						    {
@@ -429,19 +221,14 @@ public class MainActivity extends Activity
 
     	toggleButton2.setOnClickListener(new OnClickListener() 
     	{
-    		TelnetClient l_telnet = new TelnetClient();
-    		InputStream l_in;
-    		PrintStream l_out;
+    		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
     		boolean l_worked = false;
     		
     		public void onClick(View v) 
     		{
     			try
     			{
-    				// set a small connection timeout so user does
-    				// not wait a long time 
-    				l_telnet.setConnectTimeout(250);
-    				l_telnet.connect(SavedIp, SavedPort);
+    				l_wifly.connect();
     			}
     			catch ( java.net.SocketTimeoutException e)
     			{
@@ -471,48 +258,19 @@ public class MainActivity extends Activity
     			}
 
     			// did we connect?
-    			if (l_telnet.isConnected())
+    			if (l_wifly.isConnected())
     			{		
-    				// setup our input and output streams
-    				l_in = l_telnet.getInputStream();			
-    				l_out = new PrintStream(l_telnet.getOutputStream());
-
     				Thread mThread = new Thread(new Runnable() 
     				{
     					public void run() 
     					{
     						try 
     						{
-    							// handshake with wifly module
-    							handshake( l_in, l_out);
-
-    							// get prompt from wifly module
-    							getPrompt( l_in );				
-
-    							// send command to pulse pin 4 on
-    							sendCommand( modulePin4on, l_out);
-
-    							// get prompt from wifly module    								
-    							getPrompt( l_in );
-
-      						    // Note: wifly requires at least some time to 
-      						    // saturate output pins to high 
-      						    delayBetweenSends(100);
+    							l_wifly.SendAll(4);
     							
-    							// send command to pulse pin 4 off
-    							sendCommand( modulePin4off, l_out );
-
-    							// get prompt from wifly module    								
-    							getPrompt( l_in );
-    							
-    							// attempt to read value from module
-    							final int l_read = sendCommandAndRead( l_in, l_out );
-
     							// if we have gotten to this point everything should have worked!!
     							l_worked = true;
 
-    							// lets disconnect to allow any new connections to work
-    							disconnect( l_telnet, l_in, l_out);			
 
     							MainActivity.this.mHandler.post(new Runnable()
     							{
@@ -537,7 +295,7 @@ public class MainActivity extends Activity
     							{
     								public void run() 
     								{
-    									if ( l_read > 100 )
+    									if ( l_wifly.Sensor1() > 100 )
     									{
     										textview5.setText("garage door 1 is closed");
     										if (toggleButton1.getText().equals("open"))
@@ -556,6 +314,29 @@ public class MainActivity extends Activity
     											toggleButton1.setChecked(true);
     										}
     									}
+    									
+    									/*
+    									if ( l_sensor2 > 100 )
+    									{
+    										textview5.setText( textview5.getText().toString() + "garage door 2 is closed");
+    										if (toggleButton3.getText().equals("open"))
+    										{
+    											image3.setImageResource(R.drawable.garage_closed);
+    											toggleButton3.setChecked(false);
+    										}
+    											
+    									}
+    									else
+    									{
+    										textview5.setText( textview5.getText().toString() + "garage door 2 is open");
+    										
+    										if (toggleButton3.getText().equals("close"))
+    										{
+    											image3.setImageResource(R.drawable.garage_opened);
+    											toggleButton3.setChecked(true);
+    										}
+    									}
+    									*/
     									
     								}    								
     							});
@@ -588,17 +369,14 @@ public class MainActivity extends Activity
     	
     	toggleButton3.setOnClickListener(new OnClickListener() 
     	{
-    		TelnetClient l_telnet = new TelnetClient();
- 		    InputStream l_in;
- 		    PrintStream l_out;
+    		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
  		    boolean l_worked = false;
  		     
       		public void onClick(View v) 
     		{
       		     try
       		     {
-      		    	 l_telnet.setConnectTimeout(250);
-      		    	 l_telnet.connect(SavedIp, SavedPort);
+      		    	 l_wifly.connect();
       		     }
       		     catch ( java.net.SocketTimeoutException e)
       		     {
@@ -639,44 +417,18 @@ public class MainActivity extends Activity
       		    	 System.out.println( iv_android + "unexpected exception hit" );
       		     }
 
-      		     if (l_telnet.isConnected())
+      		     if (l_wifly.isConnected())
       		     {		
-      		    	 l_in = l_telnet.getInputStream();			
-      		    	 l_out = new PrintStream(l_telnet.getOutputStream());
-
       		    	 Thread mThread = new Thread(new Runnable() 
       		    	 {
       		    		 public void run() 
       		    		 {
       		    			 try 
       		    			 {
-      		    			     // handshake with wifly module
-      		    			     handshake( l_in, l_out);
-
-      		    			     // get prompt from wifly module
-      		    			     getPrompt( l_in );	
-
-      		    			     // send command to pulse pin 11 on
-      		    			     sendCommand( modulePin11on, l_out);
-
-      		    			     // get prompt from wifly module
-      		    			     getPrompt( l_in );
-
-       						    // Note: wifly requires at least some time to 
-       						    // saturate output pins to high 
-       						    delayBetweenSends(100);
-      		    			     
-      		    			     // send command to pulse pin 11 off
-      		    			     sendCommand( modulePin11off, l_out );
-
-      		    			     // get prompt from wifly module
-      		    			     getPrompt( l_in );
-
+      		    				 l_wifly.SendAll(11);
+      		    				 
       		    			     // if we have gotten to this point everything should have worked!!
       		    			     l_worked = true;
-
-      		    			     // lets disconnect to allow any new connections to work
-      		    			     disconnect( l_telnet, l_in, l_out);	
 
       		    			     MainActivity.this.mHandler.post(new Runnable()
       		    			     {
@@ -723,9 +475,7 @@ public class MainActivity extends Activity
 
     	toggleButton4.setOnClickListener(new OnClickListener() 
     	{
-    		TelnetClient l_telnet = new TelnetClient();
-    	    InputStream l_in;
-    	    PrintStream l_out;
+    		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
     	    boolean l_worked = false;
     		
     		public void onClick(View v) 
@@ -733,8 +483,7 @@ public class MainActivity extends Activity
     				
     				try
     				{
-    					l_telnet.setConnectTimeout(250);
-    					l_telnet.connect(SavedIp, SavedPort);
+    					l_wifly.connect();    					
     				}
     				catch ( java.net.SocketTimeoutException e)
     				{
@@ -762,45 +511,19 @@ public class MainActivity extends Activity
     			     }
     				
     				
-    				if (l_telnet.isConnected())
+    				if (l_wifly.isConnected())
     				{		
-    					l_in = l_telnet.getInputStream();			
-    					l_out = new PrintStream(l_telnet.getOutputStream());
-    				
     					Thread mThread = new Thread(new Runnable() 
     					{
     						public void run() 
     						{
     							try 
     							{
-    								// handshake with wifly module
-    							    handshake( l_in, l_out);
-
-    							    // get prompt from wifly module
-    							    getPrompt( l_in );	
-
-    							    // send command to pulse pin 9 on
-    							    sendCommand( modulePin9on, l_out);
-
-    							    // get prompt from wifly module
-    							    getPrompt( l_in );
-    							    
-           						    // Note: wifly requires at least some time to 
-           						    // saturate output pins to high 
-           						    delayBetweenSends(100);
-
-    							    // send command to pulse pin 9 off
-    							    sendCommand( modulePin9off, l_out );
-
-    							    // get prompt from wifly module
-    							    getPrompt( l_in );
-
+    								l_wifly.SendAll(9);
+    								
     							    // if we have gotten to this point everything should have worked!!
     							    l_worked = true;
 
-    							    // lets disconnect to allow any new connections to work
-    							    disconnect( l_telnet, l_in, l_out);	
-	    								
     							    MainActivity.this.mHandler.post(new Runnable()
     							    {
     							    	public void run() 
@@ -836,70 +559,61 @@ public class MainActivity extends Activity
 	// setup up button on click handler
 	public void setupButton() 
    {
-		final TelnetClient l_telnet = new TelnetClient();
+		//final TelnetClient l_telnet = new TelnetClient();
+		final wiflyConnect l_wifly = new wiflyConnect( iv_adhoc, SavedPort);
 
 	   	// button1 on the main activity is the options button
        	Button1 = (Button) findViewById(R.id.button1);
      	
-		try 
-		{
-			//setting connection timeout to something really small
-			//so we can check quickly if module is in adhoc mode
-			l_telnet.setConnectTimeout(125);
-		
-			try
-			{
-				// try to connect to adhoc ip
-				l_telnet.connect(iv_adhoc, SavedPort);
-			}
-			catch ( java.net.SocketTimeoutException e)
-			{
-				// we timed out - big indication that we are NOT in adhoc mode
-				System.out.println( iv_android + "socket timed out on adhoc mode ip, "+ iv_adhoc +", hiding setup menu button ");
-			}
-			
-			if (l_telnet.isConnected())
-			{
-				// we are in adhoc mode so we will NOT disable the setup menu
-				System.out.println( iv_android + "We are in adhoc mode!!!?" );
-			
-				Thread mThread = new Thread(new Runnable() 
-				{
-			        InputStream l_in = l_telnet.getInputStream();			
-					PrintStream l_out = new PrintStream(l_telnet.getOutputStream());
-					
-					public void run() 
-					{
-						try 
-						{
-						     // handshake with wifly module
-						     handshake( l_in, l_out);
+       	try
+       	{
+       		// try to connect to adhoc ip
+       		l_wifly.connect();
+       	}
+       	catch ( java.net.SocketTimeoutException e)
+       	{
+       		// we timed out - big indication that we are NOT in adhoc mode
+       		System.out.println( iv_android + "socket timed out on adhoc mode ip, "+ iv_adhoc +", hiding setup menu button ");
+       	}
+       	catch ( Exception e)
+       	{
+       		e.printStackTrace();
+       	}
 
-						     // get prompt from wifly module
-						     getPrompt( l_in );								
-						
-						     // lets disconnect to allow any new connections to work
-						     disconnect( l_telnet, l_in, l_out);
-						} 
-						catch (IOException e) 
-						{
-							e.printStackTrace();
-						}
-					}
-				});
-			
-				mThread.start();
-			}
-			else
-			{
-				Button1.setVisibility(View.GONE);
-			}
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
-       	
+
+       	if (l_wifly.isConnected())
+       	{
+       		// we are in adhoc mode so we will NOT disable the setup menu
+       		System.out.println( iv_android + "We are in adhoc mode!!!?" );
+
+       		Thread mThread = new Thread(new Runnable() 
+       		{
+       			public void run() 
+       			{
+       				try 
+       				{
+       					// handshake with wifly module
+       					l_wifly.handshake( );
+
+       					// get prompt from wifly module
+       					l_wifly.getPrompt( );								
+
+       					// lets disconnect to allow any new connections to work
+       					l_wifly.disconnect();
+       				} 
+       				catch (IOException e) 
+       				{
+       					e.printStackTrace();
+       				}
+       			}
+       		});
+
+       		mThread.start();
+       	}
+       	else
+       	{
+       		Button1.setVisibility(View.GONE);
+       	}
        	
     	Button1.setOnClickListener(new OnClickListener() 
     	{
