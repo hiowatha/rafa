@@ -9,13 +9,14 @@ import org.apache.commons.net.telnet.TelnetClient;
 public class wiflyConnect 
 {
 	// instance variables
-	private String iv_ip = "169.254.1.1";	
+	private String iv_ip = MainActivity.iv_adhoc;	
 	private int iv_port = 20000;
 	private TelnetClient iv_telnet = new TelnetClient();
 	private InputStream iv_in;
 	private PrintStream iv_out;
 	private int iv_sensor1 = 0;
 	//private int iv_sensor2 = 0;
+	private int iv_connectionTimeOut = 250;
    
 	private String [][] iv_togglePin = 
 	{
@@ -53,8 +54,14 @@ public class wiflyConnect
 	{
 		// set a small connection timeout so user does
 		// not wait a long time 
-		iv_telnet.setConnectTimeout(250);
+		iv_telnet.setConnectTimeout( iv_connectionTimeOut );
 		iv_telnet.connect( iv_ip, iv_port );
+	}
+	
+	public void setConnectionTimeOut( int i_connectionTimeOut )
+	{
+		iv_connectionTimeOut = i_connectionTimeOut;
+		iv_telnet.setConnectTimeout(iv_connectionTimeOut);
 	}
 	
 	public boolean isConnected()

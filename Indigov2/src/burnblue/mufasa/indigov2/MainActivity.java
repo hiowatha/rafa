@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ImageView;
-import android.widget.TextView;
+//import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Button;
@@ -38,7 +38,8 @@ public class MainActivity extends Activity
 	private ImageView image1, image2, image3, image4;
 	private Button Button1, Button2;
 	
-	private TextView textview5;
+	// used for live debug ... yes its like a live printf
+	//private TextView textview5;
   	
 	public Handler mHandler = new Handler();
 	public Handler mHandler2 = new Handler();
@@ -55,7 +56,9 @@ public class MainActivity extends Activity
     	SavedIp = ourData.getString(Options.moduleip, iv_adhoc );
         SavedPort = Integer.parseInt(ourData.getString(Options.moduleport, iv_adhocPort ));
     	
-        textview5 = (TextView) findViewById(R.id.textView5);
+        //textview5 = (TextView) findViewById(R.id.textView5);
+        
+        updateDoorInfo();
         
     	garageDoor1Button();
     	light1Button();
@@ -65,6 +68,108 @@ public class MainActivity extends Activity
     	setupButton();
     	optionsButton();
     }
+    
+    public void updateDoorInfo()
+    {
+    	// garage door 1
+    	toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
+    	image1 = (ImageView) findViewById(R.id.imageView1);
+    	
+    	// garage door 2 
+    	//toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);		
+      	//image3 = (ImageView) findViewById(R.id.imageView3);
+    	 
+      	final wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
+      	
+      	// at startup need to set connection timeout a little
+      	// higher since it keeps timing out
+      	l_wifly.setConnectionTimeOut( 750 );
+
+      	try
+      	{
+      		l_wifly.connect();
+      	}
+      	catch ( java.net.SocketTimeoutException e)
+      	{
+      		System.out.println( iv_android + "connection failure: socket timeout" );
+
+      		Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+			
+      		e.printStackTrace();
+      	}
+      	catch ( java.net.UnknownHostException e)
+      	{
+      		System.out.println( iv_android + "connection failure: unknown host" );
+
+      		Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
+      	}
+      	catch ( Exception e)
+      	{
+      		System.out.println( iv_android + "unexpected exception hit" );    					
+      	}
+
+      	if (l_wifly.isConnected())
+      	{		
+
+      		Thread mThread = new Thread(new Runnable() 
+      		{
+      			public void run() 
+      			{
+      				try 
+      				{
+      			    	// handshake with wifly module
+      			    	l_wifly.handshake();
+
+      			    	// get prompt from wifly module
+      			    	l_wifly.getPrompt();
+
+      			    	// fix door if needed
+      			    	final int l_sensor = l_wifly.readSensor1();
+      			    	
+      			    	l_wifly.disconnect();
+
+      					MainActivity.this.mHandler.post(new Runnable()
+      					{
+      						public void run() 
+      						{
+   							
+								if ( l_sensor > 100 )
+								{
+									//textview5.setText("garage door 1 is closed");
+									if (toggleButton1.getText().equals("open"))
+									{
+										image1.setImageResource(R.drawable.garage_closed);
+										toggleButton1.setChecked(false);
+									}
+										
+								}
+								else
+								{
+									//textview5.setText("garage door 1 is open");
+									if (toggleButton1.getText().equals("close"))
+									{
+										image1.setImageResource(R.drawable.garage_opened);
+										toggleButton1.setChecked(true);
+									}
+								}
+      							
+      							
+      						}
+      					});
+
+      				} 
+      				catch (IOException e) 
+      				{
+      					e.printStackTrace();
+      				}
+      			}
+      		});
+
+      		mThread.start();
+      	}
+
+    }
+    
     
     // garage door 1 button on click handler
     public void garageDoor1Button() 
@@ -297,7 +402,7 @@ public class MainActivity extends Activity
     								{
     									if ( l_wifly.Sensor1() > 100 )
     									{
-    										textview5.setText("garage door 1 is closed");
+    										//textview5.setText("garage door 1 is closed");
     										if (toggleButton1.getText().equals("open"))
     										{
     											image1.setImageResource(R.drawable.garage_closed);
@@ -307,7 +412,7 @@ public class MainActivity extends Activity
     									}
     									else
     									{
-    										textview5.setText("garage door 1 is open");
+    										//textview5.setText("garage door 1 is open");
     										if (toggleButton1.getText().equals("close"))
     										{
     											image1.setImageResource(R.drawable.garage_opened);
