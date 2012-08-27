@@ -223,22 +223,18 @@ public class MainActivity extends Activity
       				System.out.println( iv_android + "connection failure: socket timeout" );
 
       				// button says open, but since we failed, 
-      				// lets set everything for door 1/light 1 to closed/off
+      				// lets set everything for door 1 to closed
       				if (toggleButton1.getText().equals("open"))
       				{
       					toggleButton1.setChecked(false);
       	  				image1.setImageResource(R.drawable.garage_closed);
-      					toggleButton2.setChecked(false);
-      	  				image2.setImageResource(R.drawable.light_off);
       				}
       				else
       				{
       					// button says closed, but since we failed,
-      					// lets set everything for door 1/light 1 to open/closed
+      					// lets set everything for door 1 to open
       					toggleButton1.setChecked(true);
       					image1.setImageResource(R.drawable.garage_opened);
-      					toggleButton2.setChecked(true);
-      					image2.setImageResource(R.drawable.light_on);
       				}
 
     				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
@@ -251,18 +247,14 @@ public class MainActivity extends Activity
       				{
       					toggleButton1.setChecked(false);
       	  				image1.setImageResource(R.drawable.garage_closed);
-      					toggleButton2.setChecked(false);
-      	  				image2.setImageResource(R.drawable.light_off);
       					
       				}
       				else
       				{
       					// button says closed, but since we failed,
-      					// lets set everything for door 1/light 1 to open/closed
+      					// lets set everything for door 1 to open
       					toggleButton1.setChecked(true);
       					image1.setImageResource(R.drawable.garage_opened);
-      					toggleButton2.setChecked(true);
-      					image2.setImageResource(R.drawable.light_on);
       				}
 
       				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
@@ -303,8 +295,8 @@ public class MainActivity extends Activity
       						    			// wifly command worked / update both image
       						    			// + light 1 image/toggle
       						    			image1.setImageResource(R.drawable.garage_closed);
-      						    			toggleButton2.setChecked(true);
-      						    			image2.setImageResource(R.drawable.light_on);
+      						    			toggleButton2.setChecked(false);
+      						    			image2.setImageResource(R.drawable.light_off);
       						    		}
       						    		
       						    		
@@ -393,7 +385,6 @@ public class MainActivity extends Activity
     	toggleButton2.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
-    		boolean l_worked = false;
     		
     		public void onClick(View v) 
     		{
@@ -406,9 +397,15 @@ public class MainActivity extends Activity
     				System.out.println( iv_android + "connection failure: socket timeout" );
 
     				if (toggleButton2.getText().equals("on"))
+    				{
     					toggleButton2.setChecked(false);
+    					image2.setImageResource(R.drawable.light_off);
+    				}
     				else
+    				{
     					toggleButton2.setChecked(true);
+    					image2.setImageResource(R.drawable.light_on);
+    				}
     				
     				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
     			}
@@ -417,9 +414,15 @@ public class MainActivity extends Activity
     				System.out.println( iv_android + "connection failure: unknown host" );
 
     				if (toggleButton2.getText().equals("on"))
+    				{
     					toggleButton2.setChecked(false);
+    					image2.setImageResource(R.drawable.light_off);
+    				}
     				else
+    				{
     					toggleButton2.setChecked(true);
+    					image2.setImageResource(R.drawable.light_on);
+    				}
     				
     				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
     			}
@@ -440,35 +443,24 @@ public class MainActivity extends Activity
     							l_wifly.SendAll(4);
     							
     							// if we have gotten to this point everything should have worked!!
-    							l_worked = true;
-
 
     							MainActivity.this.mHandler.post(new Runnable()
     							{
     								public void run() 
     								{
-    									// check if everything worked
-    									if ( l_worked )
+    									if (toggleButton2.getText().equals("on"))
     									{
-    										if (toggleButton2.getText().equals("on"))
-    										{
-    											image2.setImageResource(R.drawable.light_on);
-    										}
-    										else
-    										{
-    											image2.setImageResource(R.drawable.light_off);
-    										}    			
+    										image2.setImageResource(R.drawable.light_on);
     									}
-    								}    								
-    							});
-
-    							MainActivity.this.mHandler2.post(new Runnable()
-    							{
-    								public void run() 
-    								{
+    									else
+    									{
+    										image2.setImageResource(R.drawable.light_off);
+    									}    
+    									
+    									// check on door 1
     									if ( l_wifly.Sensor1() > 100 )
     									{
-    										//textview5.setText("garage door 1 is closed");
+    										// sensor says we are closed
     										if (toggleButton1.getText().equals("open"))
     										{
     											image1.setImageResource(R.drawable.garage_closed);
@@ -478,7 +470,7 @@ public class MainActivity extends Activity
     									}
     									else
     									{
-    										//textview5.setText("garage door 1 is open");
+    										// sensor says we are open
     										if (toggleButton1.getText().equals("close"))
     										{
     											image1.setImageResource(R.drawable.garage_opened);
@@ -486,10 +478,10 @@ public class MainActivity extends Activity
     										}
     									}
     									
-    									/*
-    									if ( l_sensor2 > 100 )
+    									// check on door 2
+    									if ( l_wifly.Sensor2() > 100 )
     									{
-    										textview5.setText( textview5.getText().toString() + "garage door 2 is closed");
+    										// sensor says we are closed
     										if (toggleButton3.getText().equals("open"))
     										{
     											image3.setImageResource(R.drawable.garage_closed);
@@ -499,15 +491,13 @@ public class MainActivity extends Activity
     									}
     									else
     									{
-    										textview5.setText( textview5.getText().toString() + "garage door 2 is open");
-    										
+    										// sensor says we are open
     										if (toggleButton3.getText().equals("close"))
     										{
     											image3.setImageResource(R.drawable.garage_opened);
     											toggleButton3.setChecked(true);
     										}
     									}
-    									*/
     									
     								}    								
     							});
@@ -532,16 +522,17 @@ public class MainActivity extends Activity
 	// garage door 2 button on click handler
 	public void garageDoor2Button() 
    {
+		// garage door 2
     	toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);
     	image3 = (ImageView) findViewById(R.id.imageView3);
+    	
+    	// light 2
     	toggleButton4 = (ToggleButton) findViewById(R.id.toggleButton3);		
       	image4 = (ImageView) findViewById(R.id.imageView3);
- 	
     	
     	toggleButton3.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
- 		    boolean l_worked = false;
  		     
       		public void onClick(View v) 
     		{
@@ -553,15 +544,19 @@ public class MainActivity extends Activity
       		     {
       		    	 System.out.println( iv_android + "connection failure: socket timeout" );
 
+      		    	 // button says open, but since we failed,
+      		    	 // lets set everything for door 2 closed
       		    	 if (toggleButton3.getText().equals("open"))
       		    	 {
       		    		 toggleButton3.setChecked(false);
-      		    		 toggleButton4.setChecked(false);
+      		    		 image3.setImageResource(R.drawable.garage_closed);
       		    	 }
       		    	 else
       		    	 {
+      		    		 // button says closed, but since we failed,
+      		    		 // lets set everything for door 2 to open
       		    		 toggleButton3.setChecked(true);
-      		    		 toggleButton4.setChecked(true);
+      		    		 image3.setImageResource(R.drawable.garage_opened);
       		    	 }
 
       		    	Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
@@ -570,15 +565,19 @@ public class MainActivity extends Activity
       		     {
       		    	 System.out.println( iv_android + "connection failure: unknown host" );
 
+      		    	 // button says open, but since we failed,
+      		    	 // lets set everything for door 2 closed
       		    	 if (toggleButton3.getText().equals("open"))
       		    	 {
       		    		 toggleButton3.setChecked(false);
-      		    		 toggleButton4.setChecked(false);
+      		    		 image3.setImageResource(R.drawable.garage_closed);
       		    	 }
       		    	 else
       		    	 {
+      		    		 // button says closed, but since we failed,
+      		    		 // lets set everything for door 2 to open
       		    		 toggleButton3.setChecked(true);
-      		    		 toggleButton4.setChecked(true);
+      		    		 image3.setImageResource(R.drawable.garage_opened);
       		    	 }
 
        		    	Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
@@ -599,27 +598,48 @@ public class MainActivity extends Activity
       		    				 l_wifly.SendAll(11);
       		    				 
       		    			     // if we have gotten to this point everything should have worked!!
-      		    			     l_worked = true;
 
       		    			     MainActivity.this.mHandler.post(new Runnable()
       		    			     {
       		    			    	 public void run() 
       		    			    	 {
-      		    			    		 if ( l_worked )
+      		    			    		 if (toggleButton3.getText().equals("open"))
       		    			    		 {
-      		    			    			 if (toggleButton3.getText().equals("open"))
+      		    			    			 image3.setImageResource(R.drawable.garage_opened);
+      		    			    			 
+      		    			    			 toggleButton4.setChecked(true);
+      		    			    			 image4.setImageResource(R.drawable.light_on);
+      		    			    		 }
+      		    			    		 else
+      		    			    		 {
+      		    			    			 image3.setImageResource(R.drawable.garage_closed);
+      		    			    			 
+      		    			    			 toggleButton4.setChecked(false);
+      		    			    			 image4.setImageResource(R.drawable.light_off);
+      		    			    		 }
+
+      		    			    		 // check on door 1 and update if needed!
+      		    			    		 if ( l_wifly.Sensor1() > 100 )
+      		    			    		 {
+      		    			    			 // sensor says we are closed!!
+      		    			    			 if (toggleButton1.getText().equals("open"))
       		    			    			 {
-      		    			    				 image3.setImageResource(R.drawable.garage_opened);
-      		    			    				 toggleButton4.setChecked(true);
-      		    			    				 image4.setImageResource(R.drawable.light_on);
+      		    			    				 image1.setImageResource(R.drawable.garage_closed);
+      		    			    				 toggleButton1.setChecked(false);
       		    			    			 }
-      		    			    			 else
+
+      		    			    		 }
+      		    			    		 else
+      		    			    		 {
+      		    			    			 // sensor says we are open!!!
+      		    			    			 if (toggleButton1.getText().equals("close"))
       		    			    			 {
-      		    			    				 image3.setImageResource(R.drawable.garage_closed);
-      		    			    				 toggleButton4.setChecked(false);
-      		    			    				 image4.setImageResource(R.drawable.light_off);
+      		    			    				 // but buttons say we are closed, so fixing
+      		    			    				 image1.setImageResource(R.drawable.garage_opened);
+      		    			    				 toggleButton1.setChecked(true);
       		    			    			 }
       		    			    		 }
+      		    			    		 
       		    			    	 }
       		    			     });
 		    				 
@@ -647,7 +667,6 @@ public class MainActivity extends Activity
     	toggleButton4.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
-    	    boolean l_worked = false;
     		
     		public void onClick(View v) 
     		{
@@ -661,9 +680,13 @@ public class MainActivity extends Activity
     					System.out.println( iv_android + "connection failure: socket timeout" );
     					
     					if (toggleButton4.getText().equals("on"))
+    					{
         					toggleButton4.setChecked(false);
+    					}
         				else
+        				{
         					toggleButton4.setChecked(true);
+        				}
     					
     				}
     				catch ( java.net.UnknownHostException e)
@@ -693,23 +716,19 @@ public class MainActivity extends Activity
     								l_wifly.SendAll(9);
     								
     							    // if we have gotten to this point everything should have worked!!
-    							    l_worked = true;
 
     							    MainActivity.this.mHandler.post(new Runnable()
     							    {
     							    	public void run() 
     							    	{
-    							    		if ( l_worked )
+    							    		if (toggleButton4.getText().equals("on"))
     							    		{
-    							    			if (toggleButton4.getText().equals("on"))
-    							    			{
-    							    				image4.setImageResource(R.drawable.light_on);
-    							    			}
-    							    			else
-    							    			{
-    							    				image4.setImageResource(R.drawable.light_off);
-    							    			}    			
+    							    			image4.setImageResource(R.drawable.light_on);
     							    		}
+    							    		else
+    							    		{
+    							    			image4.setImageResource(R.drawable.light_off);
+    							    		}    			
     							    	}
     							    });
 	    						} 
