@@ -76,8 +76,8 @@ public class MainActivity extends Activity
     	image1 = (ImageView) findViewById(R.id.imageView1);
     	
     	// garage door 2 
-    	//toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);		
-      	//image3 = (ImageView) findViewById(R.id.imageView3);
+    	toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);		
+      	image3 = (ImageView) findViewById(R.id.imageView3);
     	 
       	final wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
       	
@@ -110,7 +110,6 @@ public class MainActivity extends Activity
 
       	if (l_wifly.isConnected())
       	{		
-
       		Thread mThread = new Thread(new Runnable() 
       		{
       			public void run() 
@@ -125,6 +124,7 @@ public class MainActivity extends Activity
 
       			    	// fix door if needed
       			    	final int l_sensor = l_wifly.readSensor1();
+      			    	final int l_sensor2 = l_wifly.readSensor2();
       			    	
       			    	l_wifly.disconnect();
 
@@ -153,7 +153,27 @@ public class MainActivity extends Activity
 									}
 								}
       							
-      							
+								if ( l_sensor2 > 100 )
+								{
+									//textview5.setText("garage door 1 is closed");
+									if (toggleButton3.getText().equals("open"))
+									{
+										image3.setImageResource(R.drawable.garage_closed);
+										toggleButton3.setChecked(false);
+									}
+										
+								}
+								else
+								{
+									//textview5.setText("garage door 1 is open");
+									if (toggleButton3.getText().equals("close"))
+									{
+										image3.setImageResource(R.drawable.garage_opened);
+										toggleButton3.setChecked(true);
+									}
+								}
+								
+								
       						}
       					});
 

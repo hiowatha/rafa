@@ -15,7 +15,7 @@ public class wiflyConnect
 	private InputStream iv_in;
 	private PrintStream iv_out;
 	private int iv_sensor1 = 0;
-	//private int iv_sensor2 = 0;
+	private int iv_sensor2 = 0;
 	private int iv_connectionTimeOut = 250;
    
 	private String [][] iv_togglePin = 
@@ -225,6 +225,13 @@ public class wiflyConnect
     	return iv_sensor1;
     }
     
+    
+    public int Sensor2()
+    {
+    	return iv_sensor2;
+    }
+    
+    
     // send a command to wifly module (use only after handshake, and follow it with a getPrompt)
     // NOTE: all commands should end with \r!
     public boolean sendCommand( String i_cmd )
@@ -257,40 +264,32 @@ public class wiflyConnect
     public void SendAll( int i_modulePinIndex ) throws IOException
     {
     	// handshake with wifly module
-    	//handshake( l_in, l_out);
     	handshake();
 
     	// get prompt from wifly module
-    	//getPrompt( l_in );
     	getPrompt();
 
     	// send command to pulse pin 4 on
-    	//sendCommand( modulePin4on, l_out);
     	sendCommand( iv_togglePin[i_modulePinIndex][0] );
 
     	// get prompt from wifly module    								
-    	//getPrompt( l_in );
     	getPrompt();
 
     	// Note: wifly requires at least some time to 
     	// saturate output pins to high 
-    	//delayBetweenSends(100);
     	delayBetweenSends(100);
 
     	// send command to pulse pin 4 off
-    	//sendCommand( modulePin4off, l_out );
     	sendCommand( iv_togglePin[i_modulePinIndex][1] );
 
     	// get prompt from wifly module    								
-    	//getPrompt( l_in );
     	getPrompt();
 
     	// fix door if needed
     	iv_sensor1 = readSensor1();
-    	//final int l_sensor2 = readSensor2( l_in, l_out );
+    	iv_sensor2 = readSensor2();
 
     	// lets disconnect to allow any new connections to work
-    	//disconnect( l_telnet, l_in, l_out);
     	disconnect();
     }
 }
