@@ -1,0 +1,2 @@
+xcopy "C:\Users\tapiar\git\rafa\Indigov2\bin\Indigov2.apk" "C:\Users\tapiar\Dropbox\sideProjects\indigo\android" /Y
+
