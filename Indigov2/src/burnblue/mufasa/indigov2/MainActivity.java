@@ -14,6 +14,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Button;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 import android.os.Handler;
 
 public class MainActivity extends Activity 
@@ -307,19 +309,40 @@ public class MainActivity extends Activity
       						    		// door 1 
       						    		if (toggleButton1.getText().equals("open"))
       						    		{
-      						    			// wifly command worked / update both image
-      						    			// + light 1 image/toggle
-      						    			image1.setImageResource(R.drawable.garage_opened);
+      						    			// light 1 is automatically on when door is opened
       						    			toggleButton2.setChecked(true);
       						    			image2.setImageResource(R.drawable.light_on);
+
+      						    			// tell user we are opening door 1
+      						    			Toast.makeText( MainActivity.this , "Opening garage door 1, please be patient", Toast.LENGTH_LONG).show();
+      						    			      						    
+      						    			// disable button while door opens
+      						    			toggleButton1.setEnabled(false);
+      						    			
+      						    			try 
+     										{
+     											TimeUnit.SECONDS.sleep(7);
+     										}
+     										catch ( Exception e )
+     										{
+     										
+     										}
+
+      						    			// disable button while door opens
+      						    			toggleButton1.setEnabled(true);
+      						    			
+      						    			// wifly command worked so update door image
+      						    			image1.setImageResource(R.drawable.garage_opened);
       						    		}
       						    		else
       						    		{
       						    			// wifly command worked / update both image
-      						    			// + light 1 image/toggle
       						    			image1.setImageResource(R.drawable.garage_closed);
-      						    			toggleButton2.setChecked(false);
-      						    			image2.setImageResource(R.drawable.light_off);
+
+      						    			// NOT turning off light since light actually stays on
+      						    			// TODO: create timer to shut light off automagically!!!
+      						    			//toggleButton2.setChecked(false);
+      						    			//image2.setImageResource(R.drawable.light_off);
       						    		}
       						    		
       						    		
@@ -636,9 +659,11 @@ public class MainActivity extends Activity
       		    			    		 else
       		    			    		 {
       		    			    			 image3.setImageResource(R.drawable.garage_closed);
-      		    			    			 
-      		    			    			 toggleButton4.setChecked(false);
-      		    			    			 image4.setImageResource(R.drawable.light_off);
+
+      		    			    			 // NOT turning off light since light actually stays on
+       						    			 // TODO: create timer to shut light off automagically!!!
+      		    			    			 //toggleButton4.setChecked(false);
+      		    			    			 //image4.setImageResource(R.drawable.light_off);
       		    			    		 }
 
       		    			    		 // check on door 1 and update if needed!
