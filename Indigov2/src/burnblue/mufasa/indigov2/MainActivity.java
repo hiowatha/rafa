@@ -67,7 +67,30 @@ public class MainActivity extends Activity
 
     	setupButton();
     	optionsButton();
+    	
+
+        
+   /*     if ( savedInstanceState != null )
+        {
+        	String ID = savedInstanceState.getString("ID");
+        	Toast.makeText( MainActivity.this , "retrieved id settings"+ ID, Toast.LENGTH_SHORT).show();
+        	System.out.println( iv_android + "retrieved id settings"+ ID );
+        }*/
     }
+    
+    /*@Override
+    public void onSaveInstanceState(Bundle outState) 
+    {
+       
+        outState.putString("ID", "1234567890");
+        Toast.makeText( MainActivity.this , "saving id settings", Toast.LENGTH_SHORT).show();
+  		System.out.println( iv_android + "saving id settings" );
+        super.onSaveInstanceState(outState);
+    }*/
+    
+
+    
+    
     
     public void updateDoorInfo()
     {
@@ -440,7 +463,7 @@ public class MainActivity extends Activity
     					{
     						try 
     						{
-    							l_wifly.SendAll(4);
+    							l_wifly.SendAll(19);
     							
     							// if we have gotten to this point everything should have worked!!
 

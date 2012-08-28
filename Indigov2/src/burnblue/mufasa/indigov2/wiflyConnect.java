@@ -24,14 +24,22 @@ public class wiflyConnect
 		{"",""},																// [1] ->
 		{"",""},																// [2] ->
 		{"",""},																// [3] ->
-		{"set sys output 0x0100 0x0100 \r", "set sys output 0x0000 0x0100 \r"}, // [4] -> module pin 4 (garage light 1)
+		{"set sys output 0x0100 0x0100 \r", "set sys output 0x0000 0x0100 \r"}, // [4] -> module pin 4
 		{"",""},																// [5] ->
 		{"",""},																// [6] ->
 		{"set sys output 0x0080 0x0080 \r", "set sys output 0x0000 0x0080 \r"}, // [7] -> module pin 7 (garage door 1)
 		{"",""},																// [8] -> 
 		{"set sys output 0x0002 0x0002 \r", "set sys output 0x0000 0x0002 \r"}, // [9] -> module pin 9 (garage light 2)
 		{"",""},																// [10]->
-		{"set sys output 0x4000 0x4000 \r", "set sys output 0x4000 0x4000 \r"}  // [11]-> module pin 11(garage door 2)
+		{"set sys output 0x4000 0x4000 \r", "set sys output 0x0000 0x4000 \r"}, // [11]-> module pin 11(garage door 2)
+		{"",""},																// [12]->
+		{"",""},																// [13]->
+		{"",""},																// [14]->
+		{"",""},																// [15]->
+		{"",""},																// [16]->
+		{"",""},																// [17]->
+		{"",""},																// [18]->
+		{"set sys output 0x0008 0x0008 \r", "set sys output 0x0000 0x0008 \r"}	// [19]-> module pin 19
 	};
 	
 	private String [] iv_readPins = 
