@@ -705,10 +705,12 @@ public class MainActivity extends Activity
     					if (toggleButton4.getText().equals("on"))
     					{
         					toggleButton4.setChecked(false);
+        					image4.setImageResource(R.drawable.light_off);
     					}
         				else
         				{
         					toggleButton4.setChecked(true);
+        					image4.setImageResource(R.drawable.light_on);
         				}
     					
     				}
@@ -717,9 +719,15 @@ public class MainActivity extends Activity
     					System.out.println( iv_android + "connection failure: unknown host" );
     					
     					if (toggleButton4.getText().equals("on"))
+    					{
         					toggleButton4.setChecked(false);
+        					image4.setImageResource(R.drawable.light_off);
+    					}
         				else
+        				{
         					toggleButton4.setChecked(true);
+        					image4.setImageResource(R.drawable.light_on);
+        				}
     					
     				}
     			     catch ( Exception e)
@@ -751,7 +759,50 @@ public class MainActivity extends Activity
     							    		else
     							    		{
     							    			image4.setImageResource(R.drawable.light_off);
-    							    		}    			
+    							    		}    
+    							    		
+    							    		// check on door 1
+    							    		if ( l_wifly.Sensor1() > 100 )
+    							    		{
+    							    			// sensor says we are closed
+    							    			if (toggleButton1.getText().equals("open"))
+    							    			{
+    							    				image1.setImageResource(R.drawable.garage_closed);
+    							    				toggleButton1.setChecked(false);
+    							    			}
+
+    							    		}
+    							    		else
+    							    		{
+    							    			// sensor says we are open
+    							    			if (toggleButton1.getText().equals("close"))
+    							    			{
+    							    				image1.setImageResource(R.drawable.garage_opened);
+    							    				toggleButton1.setChecked(true);
+    							    			}
+    							    		}
+
+    							    		// check on door 2
+    							    		if ( l_wifly.Sensor2() > 100 )
+    							    		{
+    							    			// sensor says we are closed
+    							    			if (toggleButton3.getText().equals("open"))
+    							    			{
+    							    				image3.setImageResource(R.drawable.garage_closed);
+    							    				toggleButton3.setChecked(false);
+    							    			}
+
+    							    		}
+    							    		else
+    							    		{
+    							    			// sensor says we are open
+    							    			if (toggleButton3.getText().equals("close"))
+    							    			{
+    							    				image3.setImageResource(R.drawable.garage_opened);
+    							    				toggleButton3.setChecked(true);
+    							    			}
+    							    		}
+    							    		
     							    	}
     							    });
 	    						} 
