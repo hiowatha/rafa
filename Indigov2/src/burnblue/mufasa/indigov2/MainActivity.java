@@ -14,7 +14,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Button;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+
 
 import android.os.Handler;
 
@@ -48,7 +48,8 @@ public class MainActivity extends Activity
 	public Handler activateLightsBecauseOfDoors = new Handler();
 	public Handler disableButtonWhileInProgress = new Handler();
 	public Handler enableButtonAfterProgress = new Handler();
-	
+	public Handler updateDoor2 = new Handler();
+	public Handler updateDoor1 = new Handler();
 		
 	// basically the android main function
     @Override
@@ -306,6 +307,38 @@ public class MainActivity extends Activity
 
       						    // if we have gotten to this point everything should have worked!!
 
+
+      						    MainActivity.this.updateDoor2.post(new Runnable()
+      						    {
+      						    	public void run() 
+      						    	{
+      						    		// check on door 2 and update if needed!
+    									if ( l_wifly.Sensor2() > 100 )
+    									{
+    										// sensor says we are closed!!
+    										
+    										if (toggleButton3.getText().equals("open"))
+    										{
+    											// fix button & image
+    											image3.setImageResource(R.drawable.garage_closed);
+    											toggleButton3.setChecked(false);
+    										}
+    											
+    									}
+    									else
+    									{
+    										// sensor says we are open!!!
+    										if (toggleButton3.getText().equals("close"))
+    										{
+    											// fix button & image
+    											image3.setImageResource(R.drawable.garage_opened);
+    											toggleButton3.setChecked(true);
+    										}
+    									}
+      						    	}
+      						    });
+      							
+      							
       							MainActivity.this.activateLightsBecauseOfDoors.post(new Runnable()
       							{
       								public void run()
@@ -324,11 +357,17 @@ public class MainActivity extends Activity
       									// lets disable it and eventually enable it 
       									// when door finally finishes moving
   						    			// tell user we are opening door 1
-
-      									Toast.makeText( MainActivity.this , "Opening garage door 1, please be patient", Toast.LENGTH_LONG).show();
+      									if (toggleButton1.getText().equals("open"))
+      										Toast.makeText( MainActivity.this , "Opening garage door 1, please be patient", Toast.LENGTH_SHORT).show();
+      									else
+      										Toast.makeText( MainActivity.this , "Closing garage door 1, please be patient", Toast.LENGTH_SHORT).show();
   						    			      						    
-  						    			// disable button while door opens
+  						    			// disable garage door 1 button while door moving
   						    			toggleButton1.setEnabled(false);
+
+  						    			// disable light 1 button while door is moving
+  						    			toggleButton1.setEnabled(false);
+
       								}
       							});
 
@@ -338,16 +377,11 @@ public class MainActivity extends Activity
       								{
       									if (toggleButton1.getText().equals("open"))
       						    		{
-
-      										Toast.makeText( MainActivity.this , "Garage door 1 now open", Toast.LENGTH_LONG).show();
-  						    			      						    
       										// wifly command worked so update door image
       										image1.setImageResource(R.drawable.garage_opened);
       						    		}
       									else
       									{
-      										Toast.makeText( MainActivity.this , "Garage door 1 now closed", Toast.LENGTH_LONG).show();
-      										
       						    			// wifly command worked / update both image
       						    			image1.setImageResource(R.drawable.garage_closed);
       									}
@@ -357,91 +391,34 @@ public class MainActivity extends Activity
   										toggleButton1.setEnabled(true);
       									
       								}
-      							}, 8000);
+      							}, 1000);
 
-      							
-      							
-      						    MainActivity.this.mHandler.post(new Runnable()
-      						    {
-      						    	public void run() 
-      						    	{
-      						    		// door 1 
-      						    		if (toggleButton1.getText().equals("open"))
+      							// POSIBLE solution to try to keep track of light, but
+      							// too flawed, will go with button option
+      							/*MainActivity.this.lightOffTimer.postDelayed(new Runnable()
+      							{
+      								public void run()
+      								{
+      									if (toggleButton1.getText().equals("open"))
       						    		{
-      						    			
-      						    			
-
+      										// wifly command worked so update door image
+      										image1.setImageResource(R.drawable.garage_opened);
       						    		}
-      						    		else
-      						    		{
+      									else
+      									{
       						    			// wifly command worked / update both image
       						    			image1.setImageResource(R.drawable.garage_closed);
+      									}
 
-      						    			// NOT turning off light since light actually stays on
-      						    			// TODO: create timer to shut light off automagically!!!
-      						    			//toggleButton2.setChecked(false);
-      						    			//image2.setImageResource(R.drawable.light_off);
-      						    		}
-      						    		
-      						    		
-      						    		// check on door 2 and update if needed!
-    									if ( l_wifly.Sensor2() > 100 )
-    									{
-    										// sensor says we are closed!!
-    										if (toggleButton3.getText().equals("open"))
-    										{
-    											image3.setImageResource(R.drawable.garage_closed);
-    											toggleButton3.setChecked(false);
-    										}
-    											
-    									}
-    									else
-    									{
-    										// sensor says we are open!!!
-    										if (toggleButton3.getText().equals("close"))
-    										{
-    											image3.setImageResource(R.drawable.garage_opened);
-    											toggleButton3.setChecked(true);
-    										}
-    									}
-    									
-      						    		
-      						    	}
-      						    });
+      									// user has pressed button 1 (garage door 1)
+  										// lets enable it now that door is done moving 
+  										toggleButton1.setEnabled(true);
+      									
+      								}
+      							}, 120000);*/
       						     
       						    
       						    // TODO figure out what we will do with light timer!
-     						/*	MainActivity.this.mHandler2.post(new Runnable()
-     							{
-     								public void run() 
-     								{
-     									int l_cnt = 0;
-     									
-     									do
-     									{
-     										try 
-     										{
-     											TimeUnit.SECONDS.sleep(1);
-     										}
-     										catch ( Exception e)
-     										{
-     										
-     										}
-     										
-     										l_cnt++;
-     									} while (l_cnt < 10);
-     									
-     									// check if everything worked
-     									if ( l_worked )
-     									{
-     										if (toggleButton2.getText().equals("on"))
-     										{
-     											toggleButton2.setChecked(false);
-     											image2.setImageResource(R.drawable.light_off);
-     										}     										    			
-     									}
-     								}    								
-     							});*/
 
       						     
       						} 
