@@ -38,8 +38,7 @@ public class MainActivity extends Activity
 	
 	private ToggleButton door1Toggle, door2Toggle;
 	private ImageView image1, image3;
-	private Button Button1, Button2;
-	private Button lightButton1, lightButton2;
+	private Button SetupButton, OptionsButton, lightButton1, lightButton2;
 	
 	// used for live debug ... yes its like a live printf
 	//private TextView textview5;
@@ -186,6 +185,22 @@ public class MainActivity extends Activity
 									}
 								}
 								
+								if ((l_sensor < 100 ) && (l_sensor2 < 100))
+								{
+						      		Toast.makeText( MainActivity.this , "Note: Both doors are currently open.", Toast.LENGTH_SHORT).show();
+								}
+								else if ((l_sensor > 100 ) && (l_sensor2 > 100))
+								{
+						      		Toast.makeText( MainActivity.this , "Note: Both doors are currently closed.", Toast.LENGTH_SHORT).show();
+								}
+								else if ( l_sensor < 100 )
+								{
+						      		Toast.makeText( MainActivity.this , "Note: Garage door 1 is currently open.", Toast.LENGTH_SHORT).show();
+								}
+								else if ( l_sensor2 < 100 )
+								{
+						      		Toast.makeText( MainActivity.this , "Note: Garage door 2 is currently open.", Toast.LENGTH_SHORT).show();
+								}
 								
       						}
       					});
@@ -764,7 +779,7 @@ public class MainActivity extends Activity
 		final wiflyConnect l_wifly = new wiflyConnect( iv_adhoc, SavedPort);
 
 	   	// button1 on the main activity is the options button
-       	Button1 = (Button) findViewById(R.id.button1);
+       	SetupButton = (Button) findViewById(R.id.SetupButton);
      	
        	try
        	{
@@ -813,10 +828,10 @@ public class MainActivity extends Activity
        	}
        	else
        	{
-       		Button1.setVisibility(View.GONE);
+       		SetupButton.setVisibility(View.GONE);
        	}
        	
-    	Button1.setOnClickListener(new OnClickListener() 
+    	SetupButton.setOnClickListener(new OnClickListener() 
     	{
     		public void onClick(View v) 
     		{
@@ -828,9 +843,9 @@ public class MainActivity extends Activity
 	// options button on click handler
 	public void optionsButton() 
    {
-       	Button2 = (Button) findViewById(R.id.button2);       	
+       	OptionsButton = (Button) findViewById(R.id.OptionsButton);       	
       	
-    	Button2.setOnClickListener(new OnClickListener() 
+    	OptionsButton.setOnClickListener(new OnClickListener() 
     	{
       		public void onClick(View v) 
     		{

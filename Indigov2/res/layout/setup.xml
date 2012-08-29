@@ -1,11 +1,18 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"    
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ScrollView01"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:layout_height="match_parent" >
+
+<RelativeLayout 
+    
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/gray"
     android:contentDescription="@string/door1"
     android:gravity="center|top"
-    android:paddingTop="50dp" >
+    android:paddingTop="25dp" >
 
     <TextView
         android:id="@+id/textView1"
@@ -17,7 +24,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <Spinner
-        android:id="@+id/spinner1"
+        android:id="@+id/authType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
@@ -38,11 +45,11 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/wifiSsid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/spinner1"
-        android:layout_below="@+id/spinner1"
+        android:layout_alignLeft="@+id/authType"
+        android:layout_below="@+id/authType"
         android:ems="10"
         android:maxLength="16"
         android:inputType="text"
@@ -56,18 +63,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView2"
-        android:layout_below="@+id/editText1"
+        android:layout_below="@+id/wifiSsid"
         android:layout_marginTop="32dp"
         
         android:text="@string/WifiPassword"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/wifiPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView3"
-        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignLeft="@+id/wifiSsid"
         android:ems="10"
         android:inputType="textPassword"
         android:maxLength="16"
@@ -75,7 +82,7 @@
         android:width="160dp" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/CancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView3"
@@ -84,12 +91,14 @@
         android:text="@string/Cancel" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/SaveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/button2"
-        android:layout_alignBottom="@+id/button2"
-        android:layout_alignRight="@+id/editText2"
+        android:layout_alignBaseline="@+id/CancelButton"
+        android:layout_alignBottom="@+id/CancelButton"
+        android:layout_alignRight="@+id/wifiPassword"
         android:text="@string/Save" />
 
 </RelativeLayout>
+</ScrollView>
+

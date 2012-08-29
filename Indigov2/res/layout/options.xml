@@ -1,11 +1,19 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ScrollView01"
+    android:layout_width="match_parent"
+    android:background="@color/gray"
+    android:layout_height="match_parent" >
+
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/gray"
     android:contentDescription="@string/door1"
     android:gravity="center|top"
-    android:paddingTop="50dp" >
+    android:paddingTop="25dp" >
 
     <TextView
         android:id="@+id/textView1"
@@ -17,7 +25,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <Spinner
-        android:id="@+id/spinner1"
+        android:id="@+id/provider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
@@ -37,11 +45,11 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/telephone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/spinner1"
-        android:layout_below="@+id/spinner1"
+        android:layout_alignLeft="@+id/provider"
+        android:layout_below="@+id/provider"
         android:ems="10"
         android:inputType="phone"
         android:maxLength="12"
@@ -55,17 +63,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView2"
-        android:layout_below="@+id/editText1"
+        android:layout_below="@+id/telephone"
         android:layout_marginTop="35dp"
         android:text="@string/TextMeTimer"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/textTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView3"
-        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignLeft="@+id/telephone"
         android:ems="10"
         android:inputType="number"
         android:maxLength="8"
@@ -77,17 +85,17 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_alignLeft="@+id/textView3"
-       android:layout_below="@+id/editText2"
+       android:layout_below="@+id/textTimer"
        android:layout_marginTop="35dp"
        android:text="@string/ModuleIP"
        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/editText3"
+        android:id="@+id/moduleIp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView4"
-        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignLeft="@+id/telephone"
         android:ems="10"
         android:inputType="text"
         android:maxLength="32"
@@ -99,18 +107,18 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_alignLeft="@+id/textView1"
-       android:layout_below="@+id/editText3"
+       android:layout_below="@+id/moduleIp"
        android:layout_marginTop="35dp"
        android:text="@string/ModulePort"
        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 
     <EditText
-        android:id="@+id/editText4"
+        android:id="@+id/modulePort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView5"
-        android:layout_alignLeft="@+id/editText1"
+        android:layout_alignLeft="@+id/telephone"
         android:ems="10"
         android:inputType="number"
         android:maxLength="6"        
@@ -120,7 +128,7 @@
     
     
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/CancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView5"
@@ -129,12 +137,14 @@
         android:text="@string/Cancel" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/SaveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/button2"
-        android:layout_alignBottom="@+id/button2"
-        android:layout_alignRight="@+id/editText2"
+        android:layout_alignBaseline="@+id/CancelButton"
+        android:layout_alignBottom="@+id/CancelButton"
+        android:layout_alignRight="@+id/textTimer"
         android:text="@string/Save" />
 
 </RelativeLayout>
+
+</ScrollView>

@@ -1,7 +1,13 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ScrollView01"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:layout_height="match_parent" >
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/gray"
     android:gravity="center|top"
     android:paddingTop="25dp" >
@@ -128,7 +134,7 @@
         android:text="@string/light" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/SetupButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/imageView4"
@@ -137,20 +143,22 @@
         android:text="@string/Setup" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/OptionsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_below="@+id/imageView4"
         android:layout_alignRight="@+id/lightButton2"
+        android:layout_below="@+id/imageView4"
+        android:layout_marginTop="50dp"
         android:text="@string/Options" />
 
     <TextView
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/button2"
-        android:layout_below="@+id/button2"
+        android:layout_alignRight="@+id/OptionsButton"
+        android:layout_below="@+id/OptionsButton"
         android:layout_marginTop="56dp" />
             
 </RelativeLayout>
+
+</ScrollView>

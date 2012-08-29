@@ -18,7 +18,7 @@ import org.apache.commons.net.telnet.TelnetClient;
 
 public class Setup extends Activity 
 {
-	private Button Button1, Button2;
+	private Button CancelButton, SaveButton;
 	
 	String server = "192.168.2.175";	
 	private int port = 20000;
@@ -85,8 +85,8 @@ public class Setup extends Activity
 									
 									if ( l_save )
 									{
-										Button1.setEnabled(false);
-										Setup.this.Button1.setEnabled(false);
+										CancelButton.setEnabled(false);
+										Setup.this.CancelButton.setEnabled(false);
 									}
 									
 									System.out.println("Disable: " + l_save + "\n" );
@@ -118,7 +118,7 @@ public class Setup extends Activity
     	cancelButton();
     	
     	if ( l_save )
-    		Button1.setEnabled(false);
+    		CancelButton.setEnabled(false);
     	
     	System.out.println("Disable: " + l_save + "\n" );
     	
@@ -128,9 +128,9 @@ public class Setup extends Activity
 
 	public void saveButton() 
 	{
-    	Button1 = (Button) findViewById(R.id.button1);
+    	CancelButton = (Button) findViewById(R.id.CancelButton);
     	
-    	Button1.setOnClickListener(new OnClickListener() 
+    	CancelButton.setOnClickListener(new OnClickListener() 
     	{
       		public void onClick(View v) 
     		{
@@ -143,9 +143,9 @@ public class Setup extends Activity
    
    public void cancelButton() 
    {
-      	Button2 = (Button) findViewById(R.id.button2);
+      	SaveButton = (Button) findViewById(R.id.SaveButton);
 
-    	Button2.setOnClickListener(new OnClickListener() 
+    	SaveButton.setOnClickListener(new OnClickListener() 
     	{
      		public void onClick(View v) 
     		{
@@ -224,9 +224,9 @@ public class Setup extends Activity
 		{
 			System.out.println("User NOT in SETUP mode! \nDisabling Save button. \n");
 			
-			//Button1 = (Button) findViewById(R.id.button1);
+			//CancelButton = (Button) findViewById(R.id.CancelButton);
 	    	
-	    	//Button1.setEnabled(false);
+	    	//CancelButton.setEnabled(false);
 			
 			
 			

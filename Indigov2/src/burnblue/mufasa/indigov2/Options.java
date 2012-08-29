@@ -15,7 +15,7 @@ import android.widget.Spinner;
 
 public class Options extends Activity 
 {
-	private Button Button1, Button2;
+	private Button SaveButton, CancelButton;
 	public static String fileName = "myData";
 	
 	public static String provider = "provider";
@@ -42,11 +42,11 @@ public class Options extends Activity
         String SavedModuleIp = ourData.getString(moduleip, "192.168.2.2");
         String SavedModulePort = ourData.getString(moduleport, "2000");
         
-		Spinner provider = (Spinner) findViewById(R.id.spinner1);
-		EditText telephone = (EditText) findViewById(R.id.editText1);
-		EditText texttimer = (EditText) findViewById(R.id.editText2);
-		EditText moduleip = (EditText) findViewById(R.id.editText3);
-		EditText moduleport = (EditText) findViewById(R.id.editText4);
+		Spinner provider = (Spinner) findViewById(R.id.provider);
+		EditText telephone = (EditText) findViewById(R.id.telephone);
+		EditText texttimer = (EditText) findViewById(R.id.textTimer);
+		EditText moduleip = (EditText) findViewById(R.id.moduleIp);
+		EditText moduleport = (EditText) findViewById(R.id.modulePort);
 		
         provider.setSelection(SavedPropos);
         telephone.setText(SavedTelephone);
@@ -60,17 +60,17 @@ public class Options extends Activity
     
    public void saveButton() 
    {
-    	Button1 = (Button) findViewById(R.id.button1);
+    	SaveButton = (Button) findViewById(R.id.SaveButton);
    	
-    	Button1.setOnClickListener(new OnClickListener() 
+    	SaveButton.setOnClickListener(new OnClickListener() 
     	{
       		public void onClick(View v) 
     		{
-      			Spinner et_provider = (Spinner) findViewById(R.id.spinner1);
-      			EditText et_telephone = (EditText) findViewById(R.id.editText1);
-      			EditText et_texttimer = (EditText) findViewById(R.id.editText2);
-      			EditText et_moduleip = (EditText) findViewById(R.id.editText3);
-      			EditText et_moduleport = (EditText) findViewById(R.id.editText4);
+      			Spinner et_provider = (Spinner) findViewById(R.id.provider);
+      			EditText et_telephone = (EditText) findViewById(R.id.telephone);
+      			EditText et_texttimer = (EditText) findViewById(R.id.textTimer);
+      			EditText et_moduleip = (EditText) findViewById(R.id.moduleIp);
+      			EditText et_moduleport = (EditText) findViewById(R.id.modulePort);
       			
       			String  l_provider = et_provider.getSelectedItem().toString();
       			Integer l_propos = et_provider.getSelectedItemPosition();
@@ -108,9 +108,9 @@ public class Options extends Activity
    
    public void cancelButton() 
    {
-      	Button2 = (Button) findViewById(R.id.button2);
+      	CancelButton = (Button) findViewById(R.id.CancelButton);
 
-    	Button2.setOnClickListener(new OnClickListener() 
+    	CancelButton.setOnClickListener(new OnClickListener() 
     	{
   
     		public void onClick(View v) 
