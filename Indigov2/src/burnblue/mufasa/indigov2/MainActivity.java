@@ -36,9 +36,10 @@ public class MainActivity extends Activity
 	private String SavedIp;
 	private int SavedPort;
 	
-	private ToggleButton toggleButton1, toggleButton2, toggleButton3, toggleButton4;
-	private ImageView image1, image2, image3, image4;
+	private ToggleButton door1Toggle, door2Toggle;
+	private ImageView image1, image3;
 	private Button Button1, Button2;
+	private Button lightButton1, lightButton2;
 	
 	// used for live debug ... yes its like a live printf
 	//private TextView textview5;
@@ -75,38 +76,16 @@ public class MainActivity extends Activity
     	setupButton();
     	optionsButton();
     	
-
-        
-   /*     if ( savedInstanceState != null )
-        {
-        	String ID = savedInstanceState.getString("ID");
-        	Toast.makeText( MainActivity.this , "retrieved id settings"+ ID, Toast.LENGTH_SHORT).show();
-        	System.out.println( iv_android + "retrieved id settings"+ ID );
-        }*/
     }
-    
-    /*@Override
-    public void onSaveInstanceState(Bundle outState) 
-    {
-       
-        outState.putString("ID", "1234567890");
-        Toast.makeText( MainActivity.this , "saving id settings", Toast.LENGTH_SHORT).show();
-  		System.out.println( iv_android + "saving id settings" );
-        super.onSaveInstanceState(outState);
-    }*/
-    
-
-    
-    
     
     public void updateDoorInfo()
     {
     	// garage door 1
-    	toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
+    	door1Toggle = (ToggleButton) findViewById(R.id.door1Toggle);
     	image1 = (ImageView) findViewById(R.id.imageView1);
     	
     	// garage door 2 
-    	toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);		
+    	door2Toggle = (ToggleButton) findViewById(R.id.door2Toggle);		
       	image3 = (ImageView) findViewById(R.id.imageView3);
     	 
       	final wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
@@ -166,44 +145,44 @@ public class MainActivity extends Activity
 								if ( l_sensor > 100 )
 								{
 									// door 1 is closed
-									if (toggleButton1.getText().equals("open"))
+									if (door1Toggle.getText().equals("open"))
 									{
 										// fix door 1 toggle & image
 										image1.setImageResource(R.drawable.garage_closed);
-										toggleButton1.setChecked(false);
+										door1Toggle.setChecked(false);
 									}
 										
 								}
 								else
 								{
 									// door 1 is open
-									if (toggleButton1.getText().equals("close"))
+									if (door1Toggle.getText().equals("close"))
 									{
 										// fix door 1 toggle & image
 										image1.setImageResource(R.drawable.garage_opened);
-										toggleButton1.setChecked(true);
+										door1Toggle.setChecked(true);
 									}
 								}
       							
 								if ( l_sensor2 > 100 )
 								{
 									// door 2 is closed
-									if (toggleButton3.getText().equals("open"))
+									if (door2Toggle.getText().equals("open"))
 									{
 										// fix door 2 toggle & image
 										image3.setImageResource(R.drawable.garage_closed);
-										toggleButton3.setChecked(false);
+										door2Toggle.setChecked(false);
 									}
 										
 								}
 								else
 								{
 									// door 2 is open
-									if (toggleButton3.getText().equals("close"))
+									if (door2Toggle.getText().equals("close"))
 									{
 										// fix door 2 toggle & image
 										image3.setImageResource(R.drawable.garage_opened);
-										toggleButton3.setChecked(true);
+										door2Toggle.setChecked(true);
 									}
 								}
 								
@@ -229,15 +208,11 @@ public class MainActivity extends Activity
     public void garageDoor1Button() 
     {
     	// garage door 1
-    	toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
+    	door1Toggle = (ToggleButton) findViewById(R.id.door1Toggle);
     	image1 = (ImageView) findViewById(R.id.imageView1);
-    	
-    	// light 1
-    	toggleButton2 = (ToggleButton) findViewById(R.id.toggleButton2);		
-      	image2 = (ImageView) findViewById(R.id.imageView2);
 
       	// garage door 1 clicked
-    	toggleButton1.setOnClickListener(new OnClickListener() 
+    	door1Toggle.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort);
     		
@@ -254,16 +229,16 @@ public class MainActivity extends Activity
 
       				// button says open, but since we failed, 
       				// lets set everything for door 1 to closed
-      				if (toggleButton1.getText().equals("open"))
+      				if (door1Toggle.getText().equals("open"))
       				{
-      					toggleButton1.setChecked(false);
+      					door1Toggle.setChecked(false);
       	  				image1.setImageResource(R.drawable.garage_closed);
       				}
       				else
       				{
       					// button says closed, but since we failed,
       					// lets set everything for door 1 to open
-      					toggleButton1.setChecked(true);
+      					door1Toggle.setChecked(true);
       					image1.setImageResource(R.drawable.garage_opened);
       				}
 
@@ -273,9 +248,9 @@ public class MainActivity extends Activity
       			{
       				System.out.println( iv_android + "connection failure: unknown host" );
 
-      				if (toggleButton1.getText().equals("open"))
+      				if (door1Toggle.getText().equals("open"))
       				{
-      					toggleButton1.setChecked(false);
+      					door1Toggle.setChecked(false);
       	  				image1.setImageResource(R.drawable.garage_closed);
       					
       				}
@@ -283,7 +258,7 @@ public class MainActivity extends Activity
       				{
       					// button says closed, but since we failed,
       					// lets set everything for door 1 to open
-      					toggleButton1.setChecked(true);
+      					door1Toggle.setChecked(true);
       					image1.setImageResource(R.drawable.garage_opened);
       				}
 
@@ -307,8 +282,8 @@ public class MainActivity extends Activity
 
       						    // if we have gotten to this point everything should have worked!!
 
-
-      						    MainActivity.this.updateDoor2.post(new Runnable()
+      							// update door 2 if needed
+      						    /*MainActivity.this.updateDoor2.post(new Runnable()
       						    {
       						    	public void run() 
       						    	{
@@ -317,38 +292,28 @@ public class MainActivity extends Activity
     									{
     										// sensor says we are closed!!
     										
-    										if (toggleButton3.getText().equals("open"))
+    										if (door2Toggle.getText().equals("open"))
     										{
     											// fix button & image
     											image3.setImageResource(R.drawable.garage_closed);
-    											toggleButton3.setChecked(false);
+    											door2Toggle.setChecked(false);
     										}
     											
     									}
     									else
     									{
     										// sensor says we are open!!!
-    										if (toggleButton3.getText().equals("close"))
+    										if (door2Toggle.getText().equals("close"))
     										{
     											// fix button & image
     											image3.setImageResource(R.drawable.garage_opened);
-    											toggleButton3.setChecked(true);
+    											door2Toggle.setChecked(true);
     										}
     									}
       						    	}
-      						    });
+      						    });*/
       							
-      							
-      							MainActivity.this.activateLightsBecauseOfDoors.post(new Runnable()
-      							{
-      								public void run()
-      								{
-      									// light 1 is automatically on when door is opened or closed
-      									toggleButton2.setChecked(true);
-      									image2.setImageResource(R.drawable.light_on);
-      								}
-      							});
-
+      						    // disable door 1 button temporarily
       							MainActivity.this.disableButtonWhileInProgress.post(new Runnable()
       							{
       								public void run()
@@ -357,25 +322,23 @@ public class MainActivity extends Activity
       									// lets disable it and eventually enable it 
       									// when door finally finishes moving
   						    			// tell user we are opening door 1
-      									if (toggleButton1.getText().equals("open"))
-      										Toast.makeText( MainActivity.this , "Opening garage door 1, please be patient", Toast.LENGTH_SHORT).show();
+      									if (door1Toggle.getText().equals("open"))
+      										Toast.makeText( MainActivity.this , "Opening garage door 1 ... ", Toast.LENGTH_SHORT).show();
       									else
-      										Toast.makeText( MainActivity.this , "Closing garage door 1, please be patient", Toast.LENGTH_SHORT).show();
+      										Toast.makeText( MainActivity.this , "Closing garage door 1 ...", Toast.LENGTH_SHORT).show();
   						    			      						    
   						    			// disable garage door 1 button while door moving
-  						    			toggleButton1.setEnabled(false);
-
-  						    			// disable light 1 button while door is moving
-  						    			toggleButton1.setEnabled(false);
+  						    			door1Toggle.setEnabled(false);
 
       								}
       							});
 
+      							// enable door 1 button now that door is moving
       							MainActivity.this.enableButtonAfterProgress.postDelayed(new Runnable()
       							{
       								public void run()
       								{
-      									if (toggleButton1.getText().equals("open"))
+      									if (door1Toggle.getText().equals("open"))
       						    		{
       										// wifly command worked so update door image
       										image1.setImageResource(R.drawable.garage_opened);
@@ -388,38 +351,10 @@ public class MainActivity extends Activity
 
       									// user has pressed button 1 (garage door 1)
   										// lets enable it now that door is done moving 
-  										toggleButton1.setEnabled(true);
+  										door1Toggle.setEnabled(true);
       									
       								}
       							}, 1000);
-
-      							// POSIBLE solution to try to keep track of light, but
-      							// too flawed, will go with button option
-      							/*MainActivity.this.lightOffTimer.postDelayed(new Runnable()
-      							{
-      								public void run()
-      								{
-      									if (toggleButton1.getText().equals("open"))
-      						    		{
-      										// wifly command worked so update door image
-      										image1.setImageResource(R.drawable.garage_opened);
-      						    		}
-      									else
-      									{
-      						    			// wifly command worked / update both image
-      						    			image1.setImageResource(R.drawable.garage_closed);
-      									}
-
-      									// user has pressed button 1 (garage door 1)
-  										// lets enable it now that door is done moving 
-  										toggleButton1.setEnabled(true);
-      									
-      								}
-      							}, 120000);*/
-      						     
-      						    
-      						    // TODO figure out what we will do with light timer!
-
       						     
       						} 
       						catch (IOException e) 
@@ -440,10 +375,9 @@ public class MainActivity extends Activity
     // garage light 1 button on click handler
 	public void light1Button() 
 	{
-		toggleButton2 = (ToggleButton) findViewById(R.id.toggleButton2);
-      	image2 = (ImageView) findViewById(R.id.imageView2);
+		lightButton1 = (Button) findViewById(R.id.lightButton1);
 
-    	toggleButton2.setOnClickListener(new OnClickListener() 
+    	lightButton1.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
     		
@@ -456,17 +390,6 @@ public class MainActivity extends Activity
     			catch ( java.net.SocketTimeoutException e)
     			{
     				System.out.println( iv_android + "connection failure: socket timeout" );
-
-    				if (toggleButton2.getText().equals("on"))
-    				{
-    					toggleButton2.setChecked(false);
-    					image2.setImageResource(R.drawable.light_off);
-    				}
-    				else
-    				{
-    					toggleButton2.setChecked(true);
-    					image2.setImageResource(R.drawable.light_on);
-    				}
     				
     				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
     			}
@@ -474,17 +397,6 @@ public class MainActivity extends Activity
     			{
     				System.out.println( iv_android + "connection failure: unknown host" );
 
-    				if (toggleButton2.getText().equals("on"))
-    				{
-    					toggleButton2.setChecked(false);
-    					image2.setImageResource(R.drawable.light_off);
-    				}
-    				else
-    				{
-    					toggleButton2.setChecked(true);
-    					image2.setImageResource(R.drawable.light_on);
-    				}
-    				
     				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
     			}
     			catch ( Exception e)
@@ -505,37 +417,29 @@ public class MainActivity extends Activity
     							
     							// if we have gotten to this point everything should have worked!!
 
+    							// update door info if needed
     							MainActivity.this.mHandler.post(new Runnable()
     							{
     								public void run() 
     								{
-    									if (toggleButton2.getText().equals("on"))
-    									{
-    										image2.setImageResource(R.drawable.light_on);
-    									}
-    									else
-    									{
-    										image2.setImageResource(R.drawable.light_off);
-    									}    
-    									
     									// check on door 1
     									if ( l_wifly.Sensor1() > 100 )
     									{
     										// sensor says we are closed
-    										if (toggleButton1.getText().equals("open"))
+    										if (door1Toggle.getText().equals("open"))
     										{
     											image1.setImageResource(R.drawable.garage_closed);
-    											toggleButton1.setChecked(false);
+    											door1Toggle.setChecked(false);
     										}
     											
     									}
     									else
     									{
     										// sensor says we are open
-    										if (toggleButton1.getText().equals("close"))
+    										if (door1Toggle.getText().equals("close"))
     										{
     											image1.setImageResource(R.drawable.garage_opened);
-    											toggleButton1.setChecked(true);
+    											door1Toggle.setChecked(true);
     										}
     									}
     									
@@ -543,20 +447,20 @@ public class MainActivity extends Activity
     									if ( l_wifly.Sensor2() > 100 )
     									{
     										// sensor says we are closed
-    										if (toggleButton3.getText().equals("open"))
+    										if (door2Toggle.getText().equals("open"))
     										{
     											image3.setImageResource(R.drawable.garage_closed);
-    											toggleButton3.setChecked(false);
+    											door2Toggle.setChecked(false);
     										}
     											
     									}
     									else
     									{
     										// sensor says we are open
-    										if (toggleButton3.getText().equals("close"))
+    										if (door2Toggle.getText().equals("close"))
     										{
     											image3.setImageResource(R.drawable.garage_opened);
-    											toggleButton3.setChecked(true);
+    											door2Toggle.setChecked(true);
     										}
     									}
     									
@@ -584,14 +488,10 @@ public class MainActivity extends Activity
 	public void garageDoor2Button() 
    {
 		// garage door 2
-    	toggleButton3 = (ToggleButton) findViewById(R.id.toggleButton3);
+    	door2Toggle = (ToggleButton) findViewById(R.id.door2Toggle);
     	image3 = (ImageView) findViewById(R.id.imageView3);
     	
-    	// light 2
-    	toggleButton4 = (ToggleButton) findViewById(R.id.toggleButton3);		
-      	image4 = (ImageView) findViewById(R.id.imageView3);
-    	
-    	toggleButton3.setOnClickListener(new OnClickListener() 
+    	door2Toggle.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
  		     
@@ -607,16 +507,16 @@ public class MainActivity extends Activity
 
       		    	 // button says open, but since we failed,
       		    	 // lets set everything for door 2 closed
-      		    	 if (toggleButton3.getText().equals("open"))
+      		    	 if (door2Toggle.getText().equals("open"))
       		    	 {
-      		    		 toggleButton3.setChecked(false);
+      		    		 door2Toggle.setChecked(false);
       		    		 image3.setImageResource(R.drawable.garage_closed);
       		    	 }
       		    	 else
       		    	 {
       		    		 // button says closed, but since we failed,
       		    		 // lets set everything for door 2 to open
-      		    		 toggleButton3.setChecked(true);
+      		    		 door2Toggle.setChecked(true);
       		    		 image3.setImageResource(R.drawable.garage_opened);
       		    	 }
 
@@ -628,16 +528,16 @@ public class MainActivity extends Activity
 
       		    	 // button says open, but since we failed,
       		    	 // lets set everything for door 2 closed
-      		    	 if (toggleButton3.getText().equals("open"))
+      		    	 if (door2Toggle.getText().equals("open"))
       		    	 {
-      		    		 toggleButton3.setChecked(false);
+      		    		 door2Toggle.setChecked(false);
       		    		 image3.setImageResource(R.drawable.garage_closed);
       		    	 }
       		    	 else
       		    	 {
       		    		 // button says closed, but since we failed,
       		    		 // lets set everything for door 2 to open
-      		    		 toggleButton3.setChecked(true);
+      		    		 door2Toggle.setChecked(true);
       		    		 image3.setImageResource(R.drawable.garage_opened);
       		    	 }
 
@@ -659,52 +559,79 @@ public class MainActivity extends Activity
       		    				 l_wifly.SendAll(11);
       		    				 
       		    			     // if we have gotten to this point everything should have worked!!
+      		    				 
+       							// update door 1 if needed
+       						    /*MainActivity.this.updateDoor1.post(new Runnable()
+       						    {
+       						    	public void run() 
+       						    	{
+       						    		// check on door 2 and update if needed!
+     									if ( l_wifly.Sensor1() > 100 )
+     									{
+     										// sensor says we are closed!!
+     										
+     										if (door1Toggle.getText().equals("open"))
+     										{
+     											// fix button & image
+     											image1.setImageResource(R.drawable.garage_closed);
+     											door1Toggle.setChecked(false);
+     										}
+     											
+     									}
+     									else
+     									{
+     										// sensor says we are open!!!
+     										if (door1Toggle.getText().equals("close"))
+     										{
+     											// fix button & image
+     											image1.setImageResource(R.drawable.garage_opened);
+     											door1Toggle.setChecked(true);
+     										}
+     									}
+       						    	}
+       						    });*/
+       							
+       						    // disable door 2 button temporarily
+       							MainActivity.this.disableButtonWhileInProgress.post(new Runnable()
+       							{
+       								public void run()
+       								{
+       									// user has pressed button 1 (garage door 1)
+       									// lets disable it and eventually enable it 
+       									// when door finally finishes moving
+   						    			// tell user we are opening door 1
+       									if (door2Toggle.getText().equals("open"))
+       										Toast.makeText( MainActivity.this , "Opening garage door 2 ... ", Toast.LENGTH_SHORT).show();
+       									else
+       										Toast.makeText( MainActivity.this , "Closing garage door 2 ...", Toast.LENGTH_SHORT).show();
+   						    			      						    
+   						    			// disable garage door 1 button while door moving
+   						    			door2Toggle.setEnabled(false);
+       								}
+       							});
 
-      		    			     MainActivity.this.mHandler.post(new Runnable()
-      		    			     {
-      		    			    	 public void run() 
-      		    			    	 {
-      		    			    		 if (toggleButton3.getText().equals("open"))
-      		    			    		 {
-      		    			    			 image3.setImageResource(R.drawable.garage_opened);
-      		    			    			 
-      		    			    			 toggleButton4.setChecked(true);
-      		    			    			 image4.setImageResource(R.drawable.light_on);
-      		    			    		 }
-      		    			    		 else
-      		    			    		 {
-      		    			    			 image3.setImageResource(R.drawable.garage_closed);
+       							// enable door 2 button now that door is moving
+       							MainActivity.this.enableButtonAfterProgress.postDelayed(new Runnable()
+       							{
+       								public void run()
+       								{
+       									if (door2Toggle.getText().equals("open"))
+       						    		{
+       										// wifly command worked so update door image
+       										image3.setImageResource(R.drawable.garage_opened);
+       						    		}
+       									else
+       									{
+       						    			// wifly command worked / update both image
+       						    			image3.setImageResource(R.drawable.garage_closed);
+       									}
 
-      		    			    			 // NOT turning off light since light actually stays on
-       						    			 // TODO: create timer to shut light off automagically!!!
-      		    			    			 //toggleButton4.setChecked(false);
-      		    			    			 //image4.setImageResource(R.drawable.light_off);
-      		    			    		 }
-
-      		    			    		 // check on door 1 and update if needed!
-      		    			    		 if ( l_wifly.Sensor1() > 100 )
-      		    			    		 {
-      		    			    			 // sensor says we are closed!!
-      		    			    			 if (toggleButton1.getText().equals("open"))
-      		    			    			 {
-      		    			    				 image1.setImageResource(R.drawable.garage_closed);
-      		    			    				 toggleButton1.setChecked(false);
-      		    			    			 }
-
-      		    			    		 }
-      		    			    		 else
-      		    			    		 {
-      		    			    			 // sensor says we are open!!!
-      		    			    			 if (toggleButton1.getText().equals("close"))
-      		    			    			 {
-      		    			    				 // but buttons say we are closed, so fixing
-      		    			    				 image1.setImageResource(R.drawable.garage_opened);
-      		    			    				 toggleButton1.setChecked(true);
-      		    			    			 }
-      		    			    		 }
-      		    			    		 
-      		    			    	 }
-      		    			     });
+       									// user has pressed button 1 (garage door 1)
+   										// lets enable it now that door is done moving 
+   										door2Toggle.setEnabled(true);
+       									
+       								}
+       							}, 1000);
 		    				 
       		    			 } 
       		    			 catch (IOException e) 
@@ -724,10 +651,9 @@ public class MainActivity extends Activity
 	// garage light 2 button on click handler
 	public void light2Button() 
 	{
- 		toggleButton4 = (ToggleButton) findViewById(R.id.toggleButton4);
-     	image4 = (ImageView) findViewById(R.id.imageView4);
+		lightButton2 = (Button) findViewById(R.id.lightButton2);
 
-    	toggleButton4.setOnClickListener(new OnClickListener() 
+    	lightButton2.setOnClickListener(new OnClickListener() 
     	{
     		wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
     		
@@ -741,34 +667,14 @@ public class MainActivity extends Activity
     				catch ( java.net.SocketTimeoutException e)
     				{
     					System.out.println( iv_android + "connection failure: socket timeout" );
-    					
-    					if (toggleButton4.getText().equals("on"))
-    					{
-        					toggleButton4.setChecked(false);
-        					image4.setImageResource(R.drawable.light_off);
-    					}
-        				else
-        				{
-        					toggleButton4.setChecked(true);
-        					image4.setImageResource(R.drawable.light_on);
-        				}
-    					
+    			
+        				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
     				}
     				catch ( java.net.UnknownHostException e)
     				{
     					System.out.println( iv_android + "connection failure: unknown host" );
     					
-    					if (toggleButton4.getText().equals("on"))
-    					{
-        					toggleButton4.setChecked(false);
-        					image4.setImageResource(R.drawable.light_off);
-    					}
-        				else
-        				{
-        					toggleButton4.setChecked(true);
-        					image4.setImageResource(R.drawable.light_on);
-        				}
-    					
+        				Toast.makeText( MainActivity.this , "Connection failure, please check your option settings", Toast.LENGTH_SHORT).show();
     				}
     			     catch ( Exception e)
     			     {
@@ -792,33 +698,24 @@ public class MainActivity extends Activity
     							    {
     							    	public void run() 
     							    	{
-    							    		if (toggleButton4.getText().equals("on"))
-    							    		{
-    							    			image4.setImageResource(R.drawable.light_on);
-    							    		}
-    							    		else
-    							    		{
-    							    			image4.setImageResource(R.drawable.light_off);
-    							    		}    
-    							    		
     							    		// check on door 1
     							    		if ( l_wifly.Sensor1() > 100 )
     							    		{
     							    			// sensor says we are closed
-    							    			if (toggleButton1.getText().equals("open"))
+    							    			if (door1Toggle.getText().equals("open"))
     							    			{
     							    				image1.setImageResource(R.drawable.garage_closed);
-    							    				toggleButton1.setChecked(false);
+    							    				door1Toggle.setChecked(false);
     							    			}
 
     							    		}
     							    		else
     							    		{
     							    			// sensor says we are open
-    							    			if (toggleButton1.getText().equals("close"))
+    							    			if (door1Toggle.getText().equals("close"))
     							    			{
     							    				image1.setImageResource(R.drawable.garage_opened);
-    							    				toggleButton1.setChecked(true);
+    							    				door1Toggle.setChecked(true);
     							    			}
     							    		}
 
@@ -826,20 +723,20 @@ public class MainActivity extends Activity
     							    		if ( l_wifly.Sensor2() > 100 )
     							    		{
     							    			// sensor says we are closed
-    							    			if (toggleButton3.getText().equals("open"))
+    							    			if (door2Toggle.getText().equals("open"))
     							    			{
     							    				image3.setImageResource(R.drawable.garage_closed);
-    							    				toggleButton3.setChecked(false);
+    							    				door2Toggle.setChecked(false);
     							    			}
 
     							    		}
     							    		else
     							    		{
     							    			// sensor says we are open
-    							    			if (toggleButton3.getText().equals("close"))
+    							    			if (door2Toggle.getText().equals("close"))
     							    			{
     							    				image3.setImageResource(R.drawable.garage_opened);
-    							    				toggleButton3.setChecked(true);
+    							    				door2Toggle.setChecked(true);
     							    			}
     							    		}
     							    		

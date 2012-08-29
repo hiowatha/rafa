@@ -55,6 +55,7 @@
     <string name="back">back</string>
     <string name="ModulePort">Module Port</string>
     <string name="SamplePort">20000</string>
+    <string name="light">light</string>
     
     
 </resources>
