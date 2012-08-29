@@ -45,6 +45,10 @@ public class MainActivity extends Activity
   	
 	public Handler mHandler = new Handler();
 	public Handler mHandler2 = new Handler();
+	public Handler activateLightsBecauseOfDoors = new Handler();
+	public Handler disableButtonWhileInProgress = new Handler();
+	public Handler enableButtonAfterProgress = new Handler();
+	
 		
 	// basically the android main function
     @Override
@@ -302,6 +306,61 @@ public class MainActivity extends Activity
 
       						    // if we have gotten to this point everything should have worked!!
 
+      							MainActivity.this.activateLightsBecauseOfDoors.post(new Runnable()
+      							{
+      								public void run()
+      								{
+      									// light 1 is automatically on when door is opened or closed
+      									toggleButton2.setChecked(true);
+      									image2.setImageResource(R.drawable.light_on);
+      								}
+      							});
+
+      							MainActivity.this.disableButtonWhileInProgress.post(new Runnable()
+      							{
+      								public void run()
+      								{
+      									// user has pressed button 1 (garage door 1)
+      									// lets disable it and eventually enable it 
+      									// when door finally finishes moving
+  						    			// tell user we are opening door 1
+
+      									Toast.makeText( MainActivity.this , "Opening garage door 1, please be patient", Toast.LENGTH_LONG).show();
+  						    			      						    
+  						    			// disable button while door opens
+  						    			toggleButton1.setEnabled(false);
+      								}
+      							});
+
+      							MainActivity.this.enableButtonAfterProgress.postDelayed(new Runnable()
+      							{
+      								public void run()
+      								{
+      									if (toggleButton1.getText().equals("open"))
+      						    		{
+
+      										Toast.makeText( MainActivity.this , "Garage door 1 now open", Toast.LENGTH_LONG).show();
+  						    			      						    
+      										// wifly command worked so update door image
+      										image1.setImageResource(R.drawable.garage_opened);
+      						    		}
+      									else
+      									{
+      										Toast.makeText( MainActivity.this , "Garage door 1 now closed", Toast.LENGTH_LONG).show();
+      										
+      						    			// wifly command worked / update both image
+      						    			image1.setImageResource(R.drawable.garage_closed);
+      									}
+
+      									// user has pressed button 1 (garage door 1)
+  										// lets enable it now that door is done moving 
+  										toggleButton1.setEnabled(true);
+      									
+      								}
+      							}, 8000);
+
+      							
+      							
       						    MainActivity.this.mHandler.post(new Runnable()
       						    {
       						    	public void run() 
@@ -309,30 +368,9 @@ public class MainActivity extends Activity
       						    		// door 1 
       						    		if (toggleButton1.getText().equals("open"))
       						    		{
-      						    			// light 1 is automatically on when door is opened
-      						    			toggleButton2.setChecked(true);
-      						    			image2.setImageResource(R.drawable.light_on);
-
-      						    			// tell user we are opening door 1
-      						    			Toast.makeText( MainActivity.this , "Opening garage door 1, please be patient", Toast.LENGTH_LONG).show();
-      						    			      						    
-      						    			// disable button while door opens
-      						    			toggleButton1.setEnabled(false);
       						    			
-      						    			try 
-     										{
-     											TimeUnit.SECONDS.sleep(7);
-     										}
-     										catch ( Exception e )
-     										{
-     										
-     										}
-
-      						    			// disable button while door opens
-      						    			toggleButton1.setEnabled(true);
       						    			
-      						    			// wifly command worked so update door image
-      						    			image1.setImageResource(R.drawable.garage_opened);
+
       						    		}
       						    		else
       						    		{
