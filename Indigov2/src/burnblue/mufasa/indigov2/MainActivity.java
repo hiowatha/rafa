@@ -15,6 +15,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.Button;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 import android.os.Handler;
@@ -227,6 +228,8 @@ public class MainActivity extends Activity
     	door1Toggle = (ToggleButton) findViewById(R.id.door1Toggle);
     	image1 = (ImageView) findViewById(R.id.imageView1);
 
+    	door2Toggle = (ToggleButton) findViewById(R.id.door2Toggle);
+    	
       	// garage door 1 clicked
     	door1Toggle.setOnClickListener(new OnClickListener() 
     	{
@@ -386,7 +389,30 @@ public class MainActivity extends Activity
     		}
  
     	});
-   } 
+   
+    	door1Toggle.setOnLongClickListener(new OnLongClickListener()
+    	{
+    		public boolean onLongClick(View v)    		
+    		{
+    			//Toast.makeText( MainActivity.this , "Long Click Listener triggered!", Toast.LENGTH_SHORT).show();
+    			door1Toggle.performClick();
+    			
+    			try 
+    			{
+    				TimeUnit.SECONDS.sleep(1);				
+    			}
+    			catch (InterruptedException e) 
+    			{
+    				e.printStackTrace();
+    			}
+    			
+    			door2Toggle.performClick();
+    			
+    			return true;
+    		}
+    	});
+    
+    } 
    
     // garage light 1 button on click handler
 	public void light1Button() 
@@ -400,7 +426,7 @@ public class MainActivity extends Activity
     		
     		public void onClick(View v) 
     		{
-    			Toast.makeText( MainActivity.this , "Click Listener triggered!", Toast.LENGTH_SHORT).show();
+    			//Toast.makeText( MainActivity.this , "Click Listener triggered!", Toast.LENGTH_SHORT).show();
     			
     			try
     			{
@@ -506,11 +532,19 @@ public class MainActivity extends Activity
     	{
     		public boolean onLongClick(View v)    		
     		{
-    			Toast.makeText( MainActivity.this , "Long Click Listener triggered!", Toast.LENGTH_SHORT).show();
-    			//lightButton1.performClick();
+    			//Toast.makeText( MainActivity.this , "Long Click Listener triggered!", Toast.LENGTH_SHORT).show();
+    			lightButton1.performClick();
+    			
+    			try 
+    			{
+    				TimeUnit.SECONDS.sleep(1);				
+    			}
+    			catch (InterruptedException e) 
+    			{
+    				e.printStackTrace();
+    			}
     			
     			lightButton2.performClick();
-    			
     			
     			return true;
     		}
