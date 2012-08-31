@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.Window;
 import android.widget.ImageView;
 //import android.widget.TextView;
@@ -391,6 +392,7 @@ public class MainActivity extends Activity
 	public void light1Button() 
 	{
 		lightButton1 = (Button) findViewById(R.id.lightButton1);
+		lightButton2 = (Button) findViewById(R.id.lightButton2);
 
     	lightButton1.setOnClickListener(new OnClickListener() 
     	{
@@ -398,6 +400,8 @@ public class MainActivity extends Activity
     		
     		public void onClick(View v) 
     		{
+    			Toast.makeText( MainActivity.this , "Click Listener triggered!", Toast.LENGTH_SHORT).show();
+    			
     			try
     			{
     				l_wifly.connect();
@@ -496,7 +500,21 @@ public class MainActivity extends Activity
     		}
  
     	});
+    
     	
+    	lightButton1.setOnLongClickListener(new OnLongClickListener()
+    	{
+    		public boolean onLongClick(View v)    		
+    		{
+    			Toast.makeText( MainActivity.this , "Long Click Listener triggered!", Toast.LENGTH_SHORT).show();
+    			//lightButton1.performClick();
+    			
+    			lightButton2.performClick();
+    			
+    			
+    			return true;
+    		}
+    	});
    } 
  
 	// garage door 2 button on click handler
