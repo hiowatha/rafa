@@ -18,6 +18,11 @@ public class wiflyConnect
 	private int iv_sensor2 = 0;
 	private int iv_connectionTimeOut = 250;
    
+	private String iv_handshakeResponse ="CMD\r\n\r\n\r\n<2.32> "; 
+	private String iv_cmdResponse="\n\r\nAOK\r\n<2.32> ";	
+	
+	public enum DoorStatus { OPEN, CLOSED };
+	
 	private String [][] iv_togglePin = 
 	{
 		{"",""},																// [0] ->
@@ -87,41 +92,39 @@ public class wiflyConnect
 		System.out.println( MainActivity.iv_android + "communication done: ip: " + iv_ip );
 	}
 
-    // get wifly prompt (use only after handshake, also needed after sending a command)
-    public boolean getPrompt( ) throws IOException
+    // get wifly prompt (pre: after handshake or after sending a commands)
+    public String getPrompt( ) throws IOException
     {
-    	boolean l_rc = false;
+    	String l_rc = new String();
     	StringBuffer l_sb = new StringBuffer();
     	int l_len = 0;
-    	    	
+    	
     	do 
     	{
-    		l_len = iv_in.read();			
+    		l_len = iv_in.read();
+    		//System.out.println(MainActivity.iv_wifly + "character: "+ l_len );
     		String s = Character.toString((char)l_len);			
     		l_sb.append( s );			
-
+    		
     		if ( (l_sb.length() > 2) && 
     				(l_sb.substring(l_sb.length()-2)).equals("> ") )
-    		{
-    			l_rc = true;
     			break;
-    		}
 
     	} while( true );
     	
-    	System.out.println(MainActivity.iv_wifly + l_sb);
-    	System.out.println(MainActivity.iv_android + "Prompt acquired, wifly is ready to receive");
+    	l_rc = l_sb.toString();
+    	
+    	//System.out.println(MainActivity.iv_wifly + l_sb);
+    	System.out.println(MainActivity.iv_android + "Prompt acquired");
     	
     	return l_rc;
     }
     
     // handshake with wifly (must be done prior to any real commands being sent)
-    public boolean handshake( ) throws IOException
+    public void handshake( ) throws IOException
     {
 		iv_in = iv_telnet.getInputStream();			
 		iv_out = new PrintStream(iv_telnet.getOutputStream());
-    	
-    	boolean l_rc = false;
     	
     	StringBuffer l_sb = new StringBuffer();
     	int l_len = 0;
@@ -135,8 +138,7 @@ public class wiflyConnect
     		l_sb.append( s );								
 
     	} while ( !l_sb.toString().equals("*HELLO*") );
-
-    	
+   	
     	System.out.println( MainActivity.iv_android + "Received: " + l_sb );
 
     	iv_out.println("$$$");
@@ -144,114 +146,104 @@ public class wiflyConnect
 
     	iv_out.println("\r");
     	iv_out.flush();
-
-    	if ( (l_sb.toString().equals("*HELLO*")) && !iv_out.checkError() )
-    		l_rc = true;
+    	
+    	String l_resp = getPrompt();
+    	
+    	if ( iv_handshakeResponse.equals(l_resp) )
+    		System.out.println(MainActivity.iv_android + "Handshake response acquired!");
     	
     	System.out.println(MainActivity.iv_android + "HandShake Done");
-    	
-    	return l_rc;
     }
 
     // readSensor1 (must be done after handshake)
-    public int readSensor1( ) throws IOException
+    // input pin will read as such 8xxxxx,
+    // ex output: show q 2 \r\n\r\n82262a,\r\n<2.32> 
+    public void readSensor1( ) throws IOException
     {
     	int l_idx = 0;
+    	int l_idx2 = 0;
+    	
+    	System.out.println(MainActivity.iv_android + "Sending:" + iv_readPins[2]);
     	
     	// send the command we want
-    	sendCommand( iv_readPins[2] );
+		iv_out.println(iv_readPins[2]);
+		iv_out.flush();		
 
     	// get prompt
-    	StringBuffer l_sb = new StringBuffer();
-    	int l_len = 0;
-    	    	
-    	do 
-    	{
-    		l_len = iv_in.read();			
-    		String s = Character.toString((char)l_len);			
-    		l_sb.append( s );			
-
-    		if ( (l_sb.length() > 2) && 
-    				(l_sb.substring(l_sb.length()-2)).equals("> ") )
-    			break;
-
-    	} while( true );
+    	String l_resp = getPrompt();
     	
-    	//System.out.println(iv_wifly + l_sb);
+    	l_idx = l_resp.indexOf("8");
+    	l_idx2= l_resp.indexOf(",");
     	
-    	l_idx = l_sb.indexOf("8");
-    	
-    	//System.out.println(iv_wifly + "length:" + l_sb.length() + "lastindex:" + l_idx );
-    	
-    	String l_tmp = l_sb.substring(l_idx+1, l_idx+6);
-    	
-    	//System.out.println(iv_wifly + "lbuf:" + l_tmp  );  	  	
+    	String l_tmp = l_resp.substring(l_idx+1, l_idx2);
   	  	
-    	return (Integer.parseInt(l_tmp, 16) / 1000 );
+    	iv_sensor1 = Integer.parseInt(l_tmp, 16) / 1000;    	
     }
     
     // readSensor2 (must be done after handshake)
-    public int readSensor2( ) throws IOException
+    public void readSensor2( ) throws IOException
     {
     	int l_idx = 0;
+    	int l_idx2 = 0;
+    	
+    	System.out.println(MainActivity.iv_android + "Sending:" + iv_readPins[5]);
     	
     	// send the command we want
-    	sendCommand( iv_readPins[5] );
+		iv_out.println(iv_readPins[5]);
+		iv_out.flush();		
 
     	// get prompt
-    	StringBuffer l_sb = new StringBuffer();
-    	int l_len = 0;
-    	    	
-    	do 
-    	{
-    		l_len = iv_in.read();			
-    		String s = Character.toString((char)l_len);			
-    		l_sb.append( s );			
-
-    		if ( (l_sb.length() > 2) && 
-    				(l_sb.substring(l_sb.length()-2)).equals("> ") )
-    			break;
-
-    	} while( true );
+		String l_resp = getPrompt();
     	
-    	//System.out.println(iv_wifly + l_sb);
+    	l_idx = l_resp.indexOf("8");
+    	l_idx2= l_resp.indexOf(",");
     	
-    	l_idx = l_sb.indexOf("8");
-    	
-    	//System.out.println(iv_wifly + "length:" + l_sb.length() + "lastindex:" + l_idx );
-    	
-    	String l_tmp = l_sb.substring(l_idx+1, l_idx+6);
-    	
-    	//System.out.println(iv_wifly + "lbuf:" + l_tmp  );  	  	
+    	String l_tmp = l_resp.substring(l_idx+1, l_idx2);
   	  	
-    	return (Integer.parseInt(l_tmp, 16) / 1000 );
+    	iv_sensor2 = Integer.parseInt(l_tmp, 16) / 1000;    	
     }
     
     
-    public int Sensor1()
+    public DoorStatus doorSensor1()
     {
-    	return iv_sensor1;
+    	DoorStatus l_rc = DoorStatus.OPEN;
+    	if ( iv_sensor1 > 100 )
+    		l_rc = DoorStatus.CLOSED;
+    	return l_rc;
     }
-    
-    
-    public int Sensor2()
+        
+    public DoorStatus doorSensor2()
     {
-    	return iv_sensor2;
+    	DoorStatus l_rc = DoorStatus.OPEN;
+    	if ( iv_sensor2 > 100 )
+    		l_rc = DoorStatus.CLOSED;
+    	return l_rc;
     }
-    
     
     // send a command to wifly module (use only after handshake, and follow it with a getPrompt)
     // NOTE: all commands should end with \r!
-    public boolean sendCommand( String i_cmd )
+    public boolean sendCommand( String i_cmd ) throws IOException
     {
     	boolean l_rc = false;
 		System.out.println(MainActivity.iv_android + "Sending:" + i_cmd);
 
-		iv_out.println(i_cmd);
-		iv_out.flush();		
+		do
+		{
+			iv_out.println(i_cmd);
+			iv_out.flush();		
 		
-		if (!iv_out.checkError())
-			l_rc = true;
+			if (!iv_out.checkError())
+				l_rc = true;
+			
+			String l_tmp = new String( i_cmd );
+			String l_resp = getPrompt();
+			
+			l_tmp.concat(iv_cmdResponse);
+			if ( l_tmp.equals(l_resp) )
+	    		System.out.println(MainActivity.iv_android + "Command Response acquired!");
+			
+			
+		} while ( false );
 		
 		return l_rc;
     }
@@ -274,14 +266,8 @@ public class wiflyConnect
     	// handshake with wifly module
     	handshake();
 
-    	// get prompt from wifly module
-    	getPrompt();
-
     	// send command to pulse pin 4 on
     	sendCommand( iv_togglePin[i_modulePinIndex][0] );
-
-    	// get prompt from wifly module    								
-    	getPrompt();
 
     	// Note: wifly requires at least some time to 
     	// saturate output pins to high 
@@ -290,12 +276,9 @@ public class wiflyConnect
     	// send command to pulse pin 4 off
     	sendCommand( iv_togglePin[i_modulePinIndex][1] );
 
-    	// get prompt from wifly module    								
-    	getPrompt();
-
     	// fix door if needed
-    	iv_sensor1 = readSensor1();
-    	iv_sensor2 = readSensor2();
+    	readSensor1();
+    	readSensor2();
 
     	// lets disconnect to allow any new connections to work
     	disconnect();

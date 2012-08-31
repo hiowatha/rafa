@@ -92,8 +92,8 @@ public class MainActivity extends Activity
       	final wiflyConnect l_wifly = new wiflyConnect( SavedIp, SavedPort );
       	
       	// at startup need to set connection timeout a little
-      	// higher since it keeps timing out
-      	l_wifly.setConnectionTimeOut( 999 );
+      	// higher since it keeps timing out 1500 = 1.5 seconds      	
+      	l_wifly.setConnectionTimeOut( 1500 );
 
       	try
       	{
@@ -129,12 +129,12 @@ public class MainActivity extends Activity
       			    	// handshake with wifly module
       			    	l_wifly.handshake();
 
-      			    	// get prompt from wifly module
-      			    	l_wifly.getPrompt();
-
       			    	// fix door if needed
-      			    	final int l_sensor = l_wifly.readSensor1();
-      			    	final int l_sensor2 = l_wifly.readSensor2();
+      			    	
+      			    	l_wifly.readSensor1();
+      			    	l_wifly.readSensor2();
+      			    	final wiflyConnect.DoorStatus l_door1 = l_wifly.doorSensor1();
+      			    	final wiflyConnect.DoorStatus l_door2 = l_wifly.doorSensor2();
       			    	
       			    	l_wifly.disconnect();
 
@@ -143,7 +143,7 @@ public class MainActivity extends Activity
       						public void run() 
       						{
    							
-								if ( l_sensor > 100 )
+      							if ( l_door1 == wiflyConnect.DoorStatus.CLOSED )
 								{
 									// door 1 is closed
 									if (door1Toggle.getText().equals("open"))
@@ -165,7 +165,7 @@ public class MainActivity extends Activity
 									}
 								}
       							
-								if ( l_sensor2 > 100 )
+								if ( l_door2 == wiflyConnect.DoorStatus.CLOSED )
 								{
 									// door 2 is closed
 									if (door2Toggle.getText().equals("open"))
@@ -187,19 +187,19 @@ public class MainActivity extends Activity
 									}
 								}
 								
-								if ((l_sensor < 100 ) && (l_sensor2 < 100))
+								if ((l_door1 == wiflyConnect.DoorStatus.OPEN ) && (l_door2 == wiflyConnect.DoorStatus.OPEN))
 								{
 						      		Toast.makeText( MainActivity.this , "Note: Both doors are currently open.", Toast.LENGTH_SHORT).show();
 								}
-								else if ((l_sensor > 100 ) && (l_sensor2 > 100))
+								else if ((l_door1 == wiflyConnect.DoorStatus.CLOSED ) && (l_door2 == wiflyConnect.DoorStatus.CLOSED))
 								{
 						      		Toast.makeText( MainActivity.this , "Note: Both doors are currently closed.", Toast.LENGTH_SHORT).show();
 								}
-								else if ( l_sensor < 100 )
+								else if ( l_door1 == wiflyConnect.DoorStatus.OPEN )
 								{
 						      		Toast.makeText( MainActivity.this , "Note: Garage door 1 is currently open.", Toast.LENGTH_SHORT).show();
 								}
-								else if ( l_sensor2 < 100 )
+								else if ( l_door2 == wiflyConnect.DoorStatus.OPEN )
 								{
 						      		Toast.makeText( MainActivity.this , "Note: Garage door 2 is currently open.", Toast.LENGTH_SHORT).show();
 								}
@@ -468,7 +468,7 @@ public class MainActivity extends Activity
     								public void run() 
     								{
     									// check on door 1
-    									if ( l_wifly.Sensor1() > 100 )
+    									if ( l_wifly.doorSensor1() == wiflyConnect.DoorStatus.CLOSED )
     									{
     										// sensor says we are closed
     										if (door1Toggle.getText().equals("open"))
@@ -489,7 +489,7 @@ public class MainActivity extends Activity
     									}
     									
     									// check on door 2
-    									if ( l_wifly.Sensor2() > 100 )
+    									if ( l_wifly.doorSensor2()  == wiflyConnect.DoorStatus.CLOSED )
     									{
     										// sensor says we are closed
     										if (door2Toggle.getText().equals("open"))
@@ -766,7 +766,7 @@ public class MainActivity extends Activity
     							    	public void run() 
     							    	{
     							    		// check on door 1
-    							    		if ( l_wifly.Sensor1() > 100 )
+    							    		if ( l_wifly.doorSensor1()  == wiflyConnect.DoorStatus.CLOSED )
     							    		{
     							    			// sensor says we are closed
     							    			if (door1Toggle.getText().equals("open"))
@@ -787,7 +787,7 @@ public class MainActivity extends Activity
     							    		}
 
     							    		// check on door 2
-    							    		if ( l_wifly.Sensor2() > 100 )
+    							    		if ( l_wifly.doorSensor2()  == wiflyConnect.DoorStatus.CLOSED )
     							    		{
     							    			// sensor says we are closed
     							    			if (door2Toggle.getText().equals("open"))
@@ -862,9 +862,6 @@ public class MainActivity extends Activity
        				{
        					// handshake with wifly module
        					l_wifly.handshake( );
-
-       					// get prompt from wifly module
-       					l_wifly.getPrompt( );								
 
        					// lets disconnect to allow any new connections to work
        					l_wifly.disconnect();
