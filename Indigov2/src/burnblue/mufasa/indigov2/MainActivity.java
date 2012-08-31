@@ -1,13 +1,15 @@
 package burnblue.mufasa.indigov2;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Vibrator;
 
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.widget.ImageView;
 //import android.widget.TextView;
@@ -16,6 +18,8 @@ import android.widget.ToggleButton;
 import android.widget.Button;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import android.view.MotionEvent;
 
 
 import android.os.Handler;
@@ -41,6 +45,7 @@ public class MainActivity extends Activity
 	private ToggleButton door1Toggle, door2Toggle;
 	private ImageView image1, image3;
 	private Button SetupButton, OptionsButton, lightButton1, lightButton2;
+	private Vibrator vibrator;
 	
 	// used for live debug ... yes its like a live printf
 	//private TextView textview5;
@@ -64,6 +69,8 @@ public class MainActivity extends Activity
         ourData = getSharedPreferences(Options.fileName, 0);
     	SavedIp = ourData.getString(Options.moduleip, iv_adhoc );
         SavedPort = Integer.parseInt(ourData.getString(Options.moduleport, iv_adhocPort ));
+        
+        vibrator = (Vibrator) getSystemService( Context.VIBRATOR_SERVICE );
     	
         //textview5 = (TextView) findViewById(R.id.textView5);
         
@@ -208,7 +215,7 @@ public class MainActivity extends Activity
       					});
 
       				} 
-      				catch (IOException e) 
+      				catch (Exception e) 
       				{
       					e.printStackTrace();
       				}
@@ -376,7 +383,7 @@ public class MainActivity extends Activity
       							}, 1000);
       						     
       						} 
-      						catch (IOException e) 
+      						catch (Exception e) 
       						{
       							e.printStackTrace();
       						}
@@ -389,29 +396,51 @@ public class MainActivity extends Activity
     		}
  
     	});
-   
-    	door1Toggle.setOnLongClickListener(new OnLongClickListener()
+    	
+    	door1Toggle.setOnTouchListener(new OnTouchListener()
     	{
-    		public boolean onLongClick(View v)    		
+    		long l_pressed = 0;
+    		long l_duration = 0;
+    		
+    		public boolean onTouch( View v, MotionEvent event )
     		{
-    			//Toast.makeText( MainActivity.this , "Long Click Listener triggered!", Toast.LENGTH_SHORT).show();
-    			door1Toggle.performClick();
     			
-    			try 
+    			if( event.getAction() == MotionEvent.ACTION_DOWN ) 
     			{
-    				TimeUnit.SECONDS.sleep(1);				
-    			}
-    			catch (InterruptedException e) 
+    				l_pressed = System.currentTimeMillis();   	
+    		    } 
+    			else if (event.getAction() == MotionEvent.ACTION_UP) 
     			{
-    				e.printStackTrace();
+    				l_duration = System.currentTimeMillis() - l_pressed;    			
+    		    }    			
+    			
+    			if ( l_duration > 2000 )
+    			{
+    				System.out.println( iv_android + "door2Toggle pressed longer than 2 seconds.");
+    				
+    				// open door 2 first 
+    				door2Toggle.performClick();
+    				
+    				// delay to give wifly module time to accept first command
+    				try 
+    				{
+    					TimeUnit.SECONDS.sleep(1);
+    				} 
+    				catch (InterruptedException e1) 
+    				{			
+    					e1.printStackTrace();
+    				}
+    				
+    				// reset our timer
+    				l_duration = 0;
     			}
     			
-    			door2Toggle.performClick();
-    			
-    			return true;
+    			return false;
     		}
+
     	});
-    
+
+    	
     } 
    
     // garage light 1 button on click handler
@@ -513,7 +542,7 @@ public class MainActivity extends Activity
     							});
     							
     						} 
-    						catch (IOException e) 
+    						catch (Exception e) 
     						{
     							e.printStackTrace();
     						}
@@ -526,29 +555,52 @@ public class MainActivity extends Activity
     		}
  
     	});
-    
     	
-    	lightButton1.setOnLongClickListener(new OnLongClickListener()
+    	lightButton1.setOnTouchListener(new OnTouchListener()
     	{
-    		public boolean onLongClick(View v)    		
+    		long l_pressed = 0;
+    		long l_duration = 0;
+    		
+    		public boolean onTouch( View v, MotionEvent event )
     		{
-    			//Toast.makeText( MainActivity.this , "Long Click Listener triggered!", Toast.LENGTH_SHORT).show();
-    			lightButton1.performClick();
     			
-    			try 
+    			if( event.getAction() == MotionEvent.ACTION_DOWN ) 
     			{
-    				TimeUnit.SECONDS.sleep(1);				
-    			}
-    			catch (InterruptedException e) 
+    				l_pressed = System.currentTimeMillis();   	
+    		    } 
+    			else if (event.getAction() == MotionEvent.ACTION_UP) 
     			{
-    				e.printStackTrace();
+    				l_duration = System.currentTimeMillis() - l_pressed;    			
+    		    }    			
+    			
+    			if ( l_duration > 2000 )
+    			{
+    				System.out.println( iv_android + "lightButton 1 pressed longer than 2 seconds.");
+    				
+    				vibrator.vibrate(500);
+    				
+    				// turn of light 2 first 
+    				lightButton2.performClick();
+    				
+    				// delay to give wifly module time to accept first command
+    				try 
+    				{
+    					TimeUnit.SECONDS.sleep(1);
+    				} 
+    				catch (InterruptedException e1) 
+    				{			
+    					e1.printStackTrace();
+    				}
+    				
+    				// reset our timer
+    				l_duration = 0;
     			}
     			
-    			lightButton2.performClick();
-    			
-    			return true;
+    			return false;
     		}
+
     	});
+    	
    } 
  
 	// garage door 2 button on click handler
@@ -701,7 +753,7 @@ public class MainActivity extends Activity
        							}, 1000);
 		    				 
       		    			 } 
-      		    			 catch (IOException e) 
+      		    			 catch (Exception e) 
       		    			 {
       		    				 e.printStackTrace();
       		    			 }
@@ -713,6 +765,50 @@ public class MainActivity extends Activity
     		}
  
     	});
+    	
+    	door2Toggle.setOnTouchListener(new OnTouchListener()
+    	{
+    		long l_pressed = 0;
+    		long l_duration = 0;
+    		
+    		public boolean onTouch( View v, MotionEvent event )
+    		{
+    			
+    			if( event.getAction() == MotionEvent.ACTION_DOWN ) 
+    			{
+    				l_pressed = System.currentTimeMillis();   	
+    		    } 
+    			else if (event.getAction() == MotionEvent.ACTION_UP) 
+    			{
+    				l_duration = System.currentTimeMillis() - l_pressed;    			
+    		    }    			
+    			
+    			if ( l_duration > 2000 )
+    			{
+    				System.out.println( iv_android + "door1Toggle pressed longer than 2 seconds.");
+    				
+    				// open door 1 first 
+    				door1Toggle.performClick();
+    				
+    				// delay to give wifly module time to accept first command
+    				try 
+    				{
+    					TimeUnit.SECONDS.sleep(1);
+    				} 
+    				catch (InterruptedException e1) 
+    				{			
+    					e1.printStackTrace();
+    				}
+    				
+    				// reset our timer
+    				l_duration = 0;
+    			}
+    			
+    			return false;
+    		}
+
+    	});
+    	
    } 
    
 	// garage light 2 button on click handler
@@ -810,7 +906,7 @@ public class MainActivity extends Activity
     							    	}
     							    });
 	    						} 
-	    						catch (IOException e) 
+	    						catch (Exception e) 
 	    						{
 	    							e.printStackTrace();
 	    						}
@@ -822,6 +918,52 @@ public class MainActivity extends Activity
     		}
  
     	});
+    	
+    	
+    	lightButton2.setOnTouchListener(new OnTouchListener()
+    	{
+    		long l_pressed = 0;
+    		long l_duration = 0;
+    		
+    		public boolean onTouch( View v, MotionEvent event )
+    		{
+    			
+    			if( event.getAction() == MotionEvent.ACTION_DOWN ) 
+    			{
+    				l_pressed = System.currentTimeMillis();   	
+    		    } 
+    			else if (event.getAction() == MotionEvent.ACTION_UP) 
+    			{
+    				l_duration = System.currentTimeMillis() - l_pressed;    			
+    		    }    			
+    			
+    			if ( l_duration > 2000 )
+    			{
+    				System.out.println( iv_android + "lightButton 2 pressed longer than 2 seconds.");
+    				
+    				// turn of light 1 first 
+    				lightButton1.performClick();
+    				
+    				// delay to give wifly module time to accept first command
+    				try 
+    				{
+    					TimeUnit.SECONDS.sleep(1);
+    				} 
+    				catch (InterruptedException e1) 
+    				{			
+    					e1.printStackTrace();
+    				}
+    				
+    				// reset our timer
+    				l_duration = 0;
+    			}
+    			
+    			return false;
+    		}
+
+    	});
+
+    	
    } 
 
 	// setup up button on click handler
