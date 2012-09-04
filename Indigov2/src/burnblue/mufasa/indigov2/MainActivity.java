@@ -100,7 +100,7 @@ public class MainActivity extends Activity
       	
       	// at startup need to set connection timeout a little
       	// higher since it keeps timing out 1500 = 1.5 seconds      	
-      	l_wifly.setConnectionTimeOut( 1500 );
+      	l_wifly.setConnectionTimeOut( 3000 );
 
       	try
       	{
